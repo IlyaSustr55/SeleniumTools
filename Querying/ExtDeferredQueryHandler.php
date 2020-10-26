@@ -2,6 +2,9 @@
 
 namespace Modera\Component\SeleniumTools\Querying;
 
+use Facebook\WebDriver\Exception\UnsupportedOperationException;
+use Facebook\WebDriver\Exception\WebDriverException;
+use Facebook\WebDriver\JavaScriptExecutor;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
@@ -169,6 +172,8 @@ JST;
             $js
         );
 
+
+
         // publishing a function once and later just invoking it instead of re-declaring it each time
         $this->driver->executeScript($js);
 
@@ -221,14 +226,35 @@ JST;
         $this->driver->executeScript($js);
         $value = $this->driver->executeScript("return window.$functionName();"); // invoking previously published function
 
-        if ($value === 'false') {
-            $this->driver->executeScript("delete window.$functionName;");
-            throw new \Exception(sprintf(
-                'Element with ExtJs query "%s" must be visible. Try to look for this element on the current page.', $query
-            ));
-        }
+        //if ($value === 'false') {
+            //$this->driver->executeScript("delete window.$functionName;");
+            //throw new \Exception(sprintf(
+            //    'Element with ExtJs query "%s" must be visible. Try to look for this element on the current page.', $query
+            //));
+        //}
 
-        $this->driver->executeScript("delete window.$functionName;");
+        //$this->driver->executeScript("delete window.$functionName;");
     }
 
+    public function executeScript($script, array $arguments = [])
+    {
+        if (!$this->driver instanceof JavaScriptExecutor) {
+            throw new UnsupportedOperationException(
+                'driver does not implement JavaScriptExecutor'
+            );
+        }
+
+        $this->dispatch('beforeScript', $script, $this);
+
+        try {
+            $result = $this->driver->executeScript($script, $arguments);
+        } catch (WebDriverException $exception) {
+            $this->dispatchOnException($exception);
+            throw $exception;
+        }
+
+        $this->dispatch('afterScript', $script, $this);
+
+        return $result;
+    }
 }

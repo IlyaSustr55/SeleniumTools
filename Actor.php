@@ -62,7 +62,7 @@ class Actor
      * @var array
      */
     private $enabledBehaviours = [
-        self::BHR_AUTO_MAXIMIZE,
+        //self::BHR_AUTO_MAXIMIZE,
         self::BHR_AUTO_FOCUS,
         self::BHR_AUTO_START
     ];

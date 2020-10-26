@@ -22,7 +22,7 @@ class ExtJsGridContext extends HarnessAwareContext
      */
     public function inGridClickColumnAtPosition($tid, $columnLabel, $position)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $position, $columnLabel) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $position, $columnLabel) {
             $js = <<<'JS'
 var grid = firstCmp;
 var column = grid.down("gridcolumn[text=%columnLabel%]");
@@ -45,7 +45,7 @@ JS;
     public function inGridIClickColumnAtRowWhichContainsPieceOfText($tid, $columnLabel, $expectedText)
     {
 
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $columnLabel) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -81,7 +81,7 @@ JS;
      */
     public function inGridDoubleClickColumnAtPosition($tid, $columnLabel, $position)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $position, $columnLabel) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $position, $columnLabel) {
             $js = <<<'JS'
 var grid = firstCmp;
 var column = grid.down("gridcolumn[text=%columnLabel%]");
@@ -103,7 +103,7 @@ JS;
      */
     public function iClickRowInGridWhoseColumnValueIs($tid, $columnLabel, $expectedColumnValue)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $columnLabel, $expectedColumnValue) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $columnLabel, $expectedColumnValue) {
             $js = <<<JS
 var grid = firstCmp;
 var view = grid.getView();
@@ -132,7 +132,7 @@ JS;
      */
     public function inGridThereMustBeNoRowWhoseColumnValueIs($tid, $columnLabel, $value)
     {
-        $this->runActiveActor(function($admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $columnLabel, $value) {
+        $this->runActiveActor(function ($admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $columnLabel, $value) {
             $js = <<<JS
 var grid = firstCmp;
 var column = grid.down('gridcolumn[text=%columnLabel%]');
@@ -152,7 +152,7 @@ JS;
      */
     public function gridMustContainAtLeastNRows($tid, $rowsCount)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $rowsCount) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $rowsCount) {
             $query = "grid[tid=$tid]";
 
             Assert::assertGreaterThanOrEqual($rowsCount, $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();'));
@@ -179,22 +179,22 @@ JS;
     {
         $isFound = false;
 
-        $this->runActiveActor(function($admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedValue, &$isFound) {
+        $this->runActiveActor(function ($admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedValue, &$isFound) {
             $js = <<<'JS'
-var grid = firstCmp;
-var store = grid.getStore();
-var columns = grid.query("gridcolumn");
-
-var isFound = false;
-Ext.each(columns, function(column) {
-    if (-1 != store.find(column.dataIndex, '%expectedValue%')) {
-        isFound = true;
-
-        return false;
-    }
-});
-
-return isFound;
+            var grid = firstCmp;
+            var store = grid.getStore();
+            var columns = grid.query("gridcolumn");
+            
+            var isFound = false;
+            Ext.each(columns, function(column) {
+                if (-1 != store.find(column.dataIndex, '%expectedValue%')) {
+                    isFound = true;
+            
+                    return false;
+                }
+            });
+            
+            return isFound;
 JS;
             $js = str_replace(['%expectedValue%'], [$expectedValue], $js);
 
@@ -209,7 +209,7 @@ JS;
      */
     public function inWorkflowMenuIclickStage($expectedText)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($expectedText) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($expectedText) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();
@@ -234,45 +234,8 @@ JS;
             $admin->action()
                 ->moveToElement($button, 10, 10)
                 ->click()
-                ->perform()
-            ;
+                ->perform();
 
-        });
-    }
-
-    /**
-     * @Then in grid :tid I click a row which contains :expectedText piece of text
-     */
-    public function inGridIClickARowWhichContainsPieceOfText($tid, $expectedText)
-    {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText) {
-            $js = <<<'JS'
-var grid = firstCmp;
-var view = grid.getView();
-var store = grid.getStore();
-var columns = grid.query("gridcolumn");
-
-var rowPosition = -1;
-Ext.each(columns, function(column) {
-    rowPosition = store.find(column.dataIndex, '%expectedText%', 0, true);
-    if (-1 != rowPosition) {
-        return false;
-    }
-});
-
-var isRowFound = -1 != rowPosition;
-if (isRowFound) {
-    return Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[rowPosition].id;
-} else {
-    return -1;
-}
-JS;
-            $js = str_replace(['%expectedText%'], [$expectedText], $js);
-
-            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
-            Assert::assertNotEquals(-1, $domId);
-
-            $admin->findElement(By::id($domId))->click();
         });
     }
 
@@ -284,7 +247,7 @@ JS;
      */
     public function inGridIClickRowAtPosition($tid, $position)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $position) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $position) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();
@@ -312,7 +275,7 @@ JS;
      */
     public function inGridIClickCellWhereOneOfTheCellsContainPieceOfText($tid, $columnLabel, $expectedText)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $columnLabel) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();
@@ -346,7 +309,7 @@ JS;
      */
     public function inGridIClickCellWhereOneOfTheCellsContainStrictMatchOfText($tid, $columnLabel, $expectedText)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $columnLabel) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();
@@ -381,7 +344,7 @@ JS;
      */
     public function inGridISeeCellWhereOneOfTheCellsContainStrictMatchOfTextAndChecked($tid, $columnLabel, $expectedText)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $columnLabel) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();
@@ -405,7 +368,7 @@ JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
 
             $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
-            $checked = $admin->findElement(By::cssSelector('#'.$domId.' div img'))->getAttribute('class');
+            $checked = $admin->findElement(By::cssSelector('#' . $domId . ' div img'))->getAttribute('class');
             var_dump($checked);
             var_dump('assertContains = x-grid-checkcolumn-checked');
             Assert::assertContains('x-grid-checkcolumn-checked', $checked);
@@ -418,7 +381,7 @@ JS;
      */
     public function inGridISeeCellWhereOneOfTheCellsContainStrictMatchOfTextAndNotChecked($tid, $columnLabel, $expectedText)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $columnLabel) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();
@@ -442,19 +405,19 @@ JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
 
             $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
-            $checked = $admin->findElement(By::cssSelector('#'.$domId.' div img'))->getAttribute('class');
+            $checked = $admin->findElement(By::cssSelector('#' . $domId . ' div img'))->getAttribute('class');
             var_dump($checked);
             var_dump('assertContains = x-grid-checkcolumn-checked');
             Assert::assertNotContains('x-grid-checkcolumn-checked', $checked);
         });
-    }    
-    
+    }
+
     /**
      * @Then grid :tid must contain :rowsCount rows
      */
     public function gridMustContainRows($tid, $rowsCount)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $rowsCount) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $rowsCount) {
             $query = "grid[tid=$tid]";
 
             Assert::assertEquals($rowsCount, $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();'));
@@ -475,7 +438,7 @@ JS;
     public function iSetPropertyValue($tid, $expectedText, $value)
     {
 
-         $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $value) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $value) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();
@@ -508,7 +471,6 @@ if (firstCmp && (firstCmp.xtype == 'combobox' || firstCmp.xtype == 'combo')) {
 }
 JS;
             $jsChange = str_replace(['%expectedValue%'], [$value], $jsChange);
-
 
 
             $js = str_replace(['%expectedText%'], [$expectedText], $js);
@@ -547,7 +509,7 @@ JS;
     public function inSettingsISetPropertyValue($expectedText, $value)
     {
 
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($expectedText, $value) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($expectedText, $value) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();
@@ -580,7 +542,6 @@ if (firstCmp && (firstCmp.xtype == 'combobox' || firstCmp.xtype == 'combo')) {
 }
 JS;
             $jsChange = str_replace(['%expectedValue%'], [$value], $jsChange);
-
 
 
             $js = str_replace(['%expectedText%'], [$expectedText], $js);
@@ -619,7 +580,6 @@ JS;
      */
     public function inGridISeePropertyValue($tid, $expectedText, $name)
     {
-
 
 //        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $name) {
 //            $js = <<<'JS'
@@ -661,8 +621,7 @@ JS;
 //        });
 
 
-
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $name) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $name) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -685,7 +644,7 @@ JS;
     public function inSettingsISeePropertyValue($expectedText, $name)
     {
 
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($expectedText, $name) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($expectedText, $name) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -707,7 +666,7 @@ JS;
     public function inGridISeePieceOfTextPropertyValue($tid, $expectedText, $name)
     {
 
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $name) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $name) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -723,14 +682,13 @@ JS;
         });
     }
 
-
     /**
      * @Then in settings I see piece of text :expectedText in row :name
      */
     public function inSettingsISeePieceOfTextPropertyValue($expectedText, $name)
     {
 
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($expectedText, $name) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($expectedText, $name) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -752,7 +710,7 @@ JS;
     public function inGridISeeDateValue($tid, $expectedText, $name)
     {
 
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $name) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $name) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -775,7 +733,7 @@ JS;
      */
     public function inGridISeePropertySmth($tid, $name)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $name) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $name) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -796,7 +754,7 @@ JS;
      */
     public function inGridISeeTodayDate($tid, $name)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $name) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $name) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -845,4 +803,140 @@ JS;
 
         }
     }
+
+    /**
+     * @When in grid :tid I once click column :columnLabel in row which contains :expectedText piece of text
+     */
+    public function inGridIOnceClickColumnAtRowWhichContainsPieceOfText($tid, $columnLabel, $expectedText)
+    {
+
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
+            $js = <<<'JS'
+var grid = firstCmp;
+var store = grid.getStore();
+var columns = grid.query("gridcolumn");
+
+var position = -1;
+Ext.each(columns, function(column) {
+    if (-1 === position) {
+        position = store.find(column.dataIndex, '%expectedValue%')
+    }
+});
+
+if (-1 === position) {
+    return false;
+}
+
+var column = grid.down("gridcolumn[text=%columnLabel%]");
+var cellCssSelector = grid.getView().getCellSelector(column);
+var cell = Ext.query(cellCssSelector)[position];
+
+return cell.id;
+JS;
+            $js = str_replace(['%columnLabel%', '%expectedValue%'], [$columnLabel, $expectedText], $js);
+
+            $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            $cell = $admin->findElement(By::id($cellDomId));
+            $admin->action()->click($cell)->perform();
+        });
+    }
+
+    /**
+     * @Then in grid :tid I click a row which contains :expectedText piece of text
+     */
+    public function inGridIClickARowWhichContainsPieceOfText($tid, $expectedText)
+    {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText) {
+            $js = <<<'JS'
+var grid = firstCmp;
+var view = grid.getView();
+var store = grid.getStore();
+var columns = grid.query("gridcolumn");
+
+var rowPosition = -1;
+Ext.each(columns, function(column) {
+    rowPosition = store.find(column.dataIndex, '%expectedText%', 0, true);
+    if (-1 != rowPosition) {
+        return false;
+    }
+});
+
+var isRowFound = -1 != rowPosition;
+if (isRowFound) {
+    return Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[rowPosition].id;
+} else {
+    return -1;
+}
+JS;
+            $js = str_replace(['%expectedText%'], [$expectedText], $js);
+
+            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            Assert::assertNotEquals(-1, $domId);
+
+            $admin->findElement(By::id($domId))->click();
+        });
+    }
+
+
+    /**
+     * @Then in grid :tid at row :row column :column I see text :expectedText
+     */
+    public function thenInGridAtRowAtColumn($tid, $expectedText, $row, $column)
+    {
+        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $row, $column) {
+            $js = <<<'JS'
+var grid = firstCmp;
+var view = grid.getView();
+var store = grid.getStore();
+var columns = grid.query("gridcolumn");
+
+// как я вижу
+// 1 - u nas est index строки
+// у нас есть колонки
+// мы должны взять отрендереннее сожержимое из этой ячейки и сравнить
+
+// но то что я виже это поиск по стору и манипуляции
+
+//var pos = grid.getSelectionModel().getCurrentPosition();
+//record = grid.store.getAt(pos.row);
+//colname = grid.getHeaderCt().getHeaderAtIndex(columnIndex).dataIndex;
+//cellvalue = record.data[colname];
+
+
+
+var rowPosition = -1;
+var columnPosition = 0;
+Ext.each(columns, function(column) {
+    rowPosition = store.find(column.dataIndex, '%expectedText%', 0, true);
+    if (-1 != rowPosition) {
+        return false;
+    }
+    else {
+        columnPosition++;
+    }
+});
+
+var isRowFound = -1 != rowPosition;
+var row = '%row%';
+var column = '%column%';
+console.log(parseInt(row), row);
+
+if(rowPosition === parseInt(row) && columnPosition === parseInt(column) && isRowFound){
+     return 1;
+} else {
+    return -1;
+}
+
+
+
+JS;
+            $js = str_replace(['%expectedText%', '%row%', '%column%'], [$expectedText, $row, $column], $js);
+
+            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            sleep(1);
+            Assert::assertEquals(1, $domId);
+
+        });
+    }
+
 }
