@@ -268,6 +268,21 @@ class MJRContext extends HarnessAwareContext
     }
 
     /**
+     * @When I click :componentType with text :text
+
+     */
+    public function abcdef($componentType, $text)
+    {
+        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($componentType, $text) {
+            $button = $q->extComponentDomId("{$componentType}[text=$text]");
+
+            $admin->findElement($button)->click();
+
+            sleep(1);
+        });
+    }
+
+    /**
      * @When I click close button in :tid
      */
     public function whenIClickCloseBtn( $tid)
@@ -319,6 +334,47 @@ class MJRContext extends HarnessAwareContext
             );
 
             Assert::assertEquals($expectedValue, $givenValue);
+        });
+    }
+
+
+
+    /**
+     * @Then in grid :tid row with position :position column :label
+     */
+    public function aldifjs($tid, $position, $columnLabel)
+    {
+        $this->runActiveActor(function($admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $position, $columnLabel) {
+            $dataIndex = $q->runWhenComponentAvailable("grid[tid=$tid] gridcolumn[text=$columnLabel]", 'return firstCmp.dataIndex');
+
+            Assert::assertNotNull($dataIndex);
+
+            $givenValue = $q->runWhenComponentAvailable(
+                "grid[tid=$tid]",
+                "var view = firstCmp.getView(); var node = view.getNode($position); console.log('some fucken string', view.getRecord(node).get('$dataIndex')); return view.getRecord(node).get('$dataIndex')"
+            );
+        });
+    }
+
+
+
+
+    /**
+     * @Then in grid :tid row with position :position column :label must be empty
+     */
+    public function gridColumnValueMustBeEmpty($tid, $position, $columnLabel)
+    {
+        $this->runActiveActor(function($admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $position, $columnLabel) {
+            $dataIndex = $q->runWhenComponentAvailable("grid[tid=$tid] gridcolumn[text=$columnLabel]", 'return firstCmp.dataIndex');
+
+            Assert::assertNotNull($dataIndex);
+
+            $givenValue = $q->runWhenComponentAvailable(
+                "grid[tid=$tid]",
+                "var view = firstCmp.getView(); var node = view.getNode($position); console.log(view.getRecord(node).get('$dataIndex')); return view.getRecord(node).get('$dataIndex')"
+            );
+
+            Assert::assertEquals("", $givenValue);
         });
     }
 
@@ -391,6 +447,55 @@ JS;
         });
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * @When I select month to :year :month
+     */
+    public function iSelectMonth($year, $month)
+    {
+        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($year, $month) {
+
+            $admin->findElements(By::xpath('//span[@class = "x-btn-wrap x-btn-split x-btn-split-right"]/span/span'))[1]->click();
+            sleep(1);
+            $admin->findElement(By::xpath('//a[contains(@class, "x-monthpicker-item-inner") and contains(text(), "'.$month.'")]'))->click();
+            $admin->findElement(By::xpath('//a[contains(@class, "x-monthpicker-item-inner") and contains(text(), "'.$year.'")]'))->click();
+            $column = $q->extComponentDomId('[text="&#160;OK&#160;"]');
+            $admin->findElement($column)->click();
+
+
+        });
+    }
+
+    /**
+     * @When I press button Today
+     */
+    public function iPressButtonToday()
+    {
+        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) {
+            $column = $q->extComponentDomId('button[text="Today"]');
+            $admin->findElement($column)->click();
+
+
+        });
+    }
+
+
     /**
      * @Then I see text :text in :tid
      * @Then I see value :text in :tid
@@ -436,6 +541,8 @@ JS;
          return firstCmp.html;
     } else if (firstCmp.tid == "totalAccessoriesPrice") {
          return firstCmp.html;
+    }  else if (firstCmp.tid == "message") {
+         return firstCmp.text.html;
     } else {
          return firstCmp.getValue();
     }
@@ -927,6 +1034,37 @@ JS;
         });
     }
 
+
+
+
+    /**
+     * @When in combobox :tid i click item with text :text
+     */
+    public function abcd($tid, $text)
+    {
+
+        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $text) {
+
+            // We cannot simply query by $tid, because it returns HTML <table> element instead of <input> that we need
+            $js = <<<'JS'
+    var fieldDomId = firstCmp.el.dom.id;
+    for(var i = 0; i < firstCmp.picker.all.elements.length; i++){
+        if(firstCmp.picker.all.elements[i].innerText === '%expectedValue%')
+            firstCmp.picker.all.elements[i].click();
+    }
+    return;
+JS;
+
+            $combobox = $q->extComponentDomId("combobox[tid=".$tid."]");
+
+            $admin->findElement($combobox)->click();
+            sleep(2);
+            $js = str_replace(['%expectedValue%'], [$text], $js);
+            $inputEl = By::id($q->runWhenComponentAvailable("combobox[tid=".$tid."]", $js));
+            $admin->findElement($combobox)->click();
+        });
+    }
+
     /**
      * @When I select checkbox :option
      */
@@ -1018,3 +1156,4 @@ JS;
         });
     }
 }
+
