@@ -170,7 +170,7 @@ JS;
 
             $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             $cell = $admin->findElement(By::id($cellDomId));
-            $admin->findElement()->click();
+            $admin->action()->doubleClick($cell)->perform();
         });
     }
 
@@ -712,13 +712,16 @@ JS;
             $js = str_replace(['%name%'], [$name], $js);
 
             $value = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
-            if($expectedText == "nothing")
+            if($expectedText == "nothing") {
                 Assert::assertEquals("", $value);
-            else if($expectedText == "something") {
+            } else if($expectedText == "something") {
                 Assert::assertNotEquals("", $value);
+            } else {
+
+                if ($expectedText != $value) var_dump([$expectedText, $value, $expectedText==$value]);
+
+                //Assert::assertEquals($expectedText, $value);
             }
-            else
-                Assert::assertEquals($expectedText, $value);
 
         });
     }
