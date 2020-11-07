@@ -549,6 +549,9 @@ JS;
 JS;
 
             $value = $q->runWhenComponentAvailable("component[tid=$tid]:nth-child({$nth}n)", $js);
+
+            $value = trim($value);
+
             var_dump($text, $value, $text == $value);
             //Assert::assertEquals($text, $value);
 
