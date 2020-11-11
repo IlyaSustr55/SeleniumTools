@@ -535,10 +535,14 @@ JS;
             $js = <<<'JS'
     if (firstCmp.xtype == 'combobox' || firstCmp.xtype == 'combo') {
          return firstCmp.getDisplayValue();
-    } else if (firstCmp.xtype == 'button') {
+    }else if(firstCmp.xtype == 'mfc-datefield') {
+        return Ext.Date.format(firstCmp.getValue(), 'l, d M Y');
+    }else if (firstCmp.xtype == 'button') {
          return firstCmp.text;
     } else if (firstCmp.xtype == 'box') {
-         return firstCmp.html;
+        if(firstCmp.html != undefined)
+            return firstCmp.html;
+        else return firstCmp.initialConfig.html;
     } else if (firstCmp.tid == "totalAccessoriesPrice") {
          return firstCmp.html;
     }  else if (firstCmp.tid == "message") {
@@ -575,6 +579,7 @@ JS;
         $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $nth) {
 
             $js = <<<'JS'
+
     if (firstCmp.xtype == 'combobox' || firstCmp.xtype == 'combo') {
          return firstCmp.getDisplayValue();
     } else if (firstCmp.xtype == 'button') {
