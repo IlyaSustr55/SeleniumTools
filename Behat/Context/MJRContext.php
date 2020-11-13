@@ -490,11 +490,16 @@ JS;
         $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) {
             $column = $q->extComponentDomId('button[text="Today"]');
             $admin->findElement($column)->click();
-
-
         });
     }
 
+    /**
+     * @Then text in :tid is equal to
+     */
+    public function viewHasText($tid, PyStringNode $markdown)
+    {
+        $this->iSeeValueInField($markdown->getRaw(), $tid);
+    }
 
     /**
      * @Then I see text :text in :tid
