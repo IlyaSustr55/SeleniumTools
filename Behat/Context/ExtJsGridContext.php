@@ -925,6 +925,13 @@ JS;
         });
     }
 
+    /**
+     * @Then in settings menu I click :expectedText item
+     */
+    public function inSettingsIClickARowWhichContainsPieceOfText($expectedText)
+    {
+        $this->inGridIClickARowWhichContainsPieceOfText("settingsMenu", $expectedText);
+    }
 
     /**
      * @Then in grid :tid at row :row column :column I see text :expectedText
