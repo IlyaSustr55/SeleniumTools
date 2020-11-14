@@ -39,9 +39,6 @@ JS;
         });
     }
 
-
-
-
     /**
      * @When in grid :tid I click trashIcon at position :position
      */
@@ -70,58 +67,6 @@ JS;
     {
 
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
-            $js = <<<'JS'
-var grid = firstCmp;
-var store = grid.getStore();
-var columns = grid.query("gridcolumn");
-
-var position = -1;
-Ext.each(columns, function(column) {
-    if (-1 === position) {
-        position = store.find(column.dataIndex, '%expectedValue%')
-    }
-});
-
-if (-1 === position) {
-    return false;
-}
-
-var column = grid.down("gridcolumn[text=%columnLabel%]");
-var cellCssSelector = grid.getView().getCellSelector(column);
-var cell = Ext.query(cellCssSelector)[position];
-
-return cell.id;
-JS;
-            $js = str_replace(['%columnLabel%', '%expectedValue%'], [$columnLabel, $expectedText], $js);
-
-            $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
-            $cell = $admin->findElement(By::id($cellDomId));
-            $admin->action()->doubleClick($cell)->perform();
-        });
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * @When in grid abcd
-     */
-    public function asdasdf()
-    {
-
-        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -204,6 +149,7 @@ JS;
     }
 
     /**
+     *
      * @Then in grid :tid there must be no row whose column :columnTitle value is :value
      */
     public function inGridThereMustBeNoRowWhoseColumnValueIs($tid, $columnLabel, $value)
@@ -339,11 +285,27 @@ JS;
     }
 
     /**
-     * @When in grid :tid I click first row
+     * @When in grid :tid I click a first row
      */
     public function inGridIClickFirstRow($tid)
     {
         $this->inGridIClickRowAtPosition($tid, 0);
+    }
+
+    /**
+     * @When in grid :tid I click a second row
+     */
+    public function inGridIClickSecondRow($tid)
+    {
+        $this->inGridIClickRowAtPosition($tid, 1);
+    }
+
+    /**
+     * @When in grid :tid I click a third row
+     */
+    public function inGridIClickThirdRow($tid)
+    {
+        $this->inGridIClickRowAtPosition($tid, 2);
     }
 
     /**
@@ -445,8 +407,6 @@ JS;
 
             $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             $checked = $admin->findElement(By::cssSelector('#' . $domId . ' div img'))->getAttribute('class');
-            var_dump($checked);
-            var_dump('assertContains = x-grid-checkcolumn-checked');
             Assert::assertContains('x-grid-checkcolumn-checked', $checked);
         });
     }
@@ -482,8 +442,6 @@ JS;
 
             $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             $checked = $admin->findElement(By::cssSelector('#' . $domId . ' div img'))->getAttribute('class');
-            var_dump($checked);
-            var_dump('assertContains = x-grid-checkcolumn-checked');
             Assert::assertNotContains('x-grid-checkcolumn-checked', $checked);
         });
     }
@@ -564,7 +522,6 @@ JS;
             $el->click();
 
             sleep(1);
-
 
             $isEditorCombo = $q->runWhenComponentAvailable("editor[editing=true]", $jsChange);
 
@@ -799,7 +756,7 @@ JS;
     public function inGridISeeDateValue($tid, $expectedText, $name)
     {
 
-        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $name) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $name, $expectedText) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
@@ -809,6 +766,8 @@ JS;
             $js = str_replace(['%name%'], [$name], $js);
 
             $value = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
+
+            if ($expectedText != $value) var_dump($value, $expectedText);
 
             Assert::assertTrue($value != 'null' && $value != '' && $value != 'false' && $value != '-');
 
@@ -861,17 +820,17 @@ JS;
         });
     }
 
-    /**
-     * @Then /grid :tid contains:/
-     */
-    public function gridContains($tid, TableNode $table)
-    {
-        $hash = $table->getHash();
-        foreach ($hash as $row) {
-            // $row['name'], $row['value'], $row['phone']
-
-            var_dump($row);
-
+//    /**
+//     * @Then /grid :tid contains:/
+//     */
+//    public function gridContains($tid, TableNode $table)
+//    {
+//        $hash = $table->getHash();
+//        foreach ($hash as $row) {
+//            // $row['name'], $row['value'], $row['phone']
+//
+//            var_dump($row);
+//
 //            $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $value) {
 //                $js = <<<'JS'
 //var grid = firstCmp;
@@ -889,9 +848,9 @@ JS;
 //                //sleep(1);
 //
 //            });
-
-        }
-    }
+//
+//        }
+//    }
 
     /**
      * @When in grid :tid I once click column :columnLabel in row which contains :expectedText piece of text
@@ -978,20 +937,6 @@ var grid = firstCmp;
 var view = grid.getView();
 var store = grid.getStore();
 var columns = grid.query("gridcolumn");
-
-// как я вижу
-// 1 - u nas est index строки
-// у нас есть колонки
-// мы должны взять отрендереннее сожержимое из этой ячейки и сравнить
-
-// но то что я виже это поиск по стору и манипуляции
-
-//var pos = grid.getSelectionModel().getCurrentPosition();
-//record = grid.store.getAt(pos.row);
-//colname = grid.getHeaderCt().getHeaderAtIndex(columnIndex).dataIndex;
-//cellvalue = record.data[colname];
-
-
 
 var rowPosition = -1;
 var columnPosition = 0;
