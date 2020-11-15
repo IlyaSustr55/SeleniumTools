@@ -930,7 +930,7 @@ JS;
      */
     public function inSettingsIClickARowWhichContainsPieceOfText($expectedText)
     {
-        $this->inGridIClickARowWhichContainsPieceOfText("settingsMenu", $expectedText);
+        $this->inGridIClickARowWhichContainsPieceOfText("settingMenu", $expectedText);
     }
 
     /**
