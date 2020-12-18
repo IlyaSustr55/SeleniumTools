@@ -14,6 +14,7 @@ use Modera\Component\SeleniumTools\Querying\ExtDeferredQueryHandler;
 use Modera\Component\SeleniumTools\Querying\By;
 use Facebook\WebDriver\WebDriverKeys;
 use PHPUnit\Framework\Assert;
+use Symfony\Component\Filesystem\Exception\IOException;
 
 /**
  * Defines application features from the specific context.
@@ -226,7 +227,6 @@ class MJRContext extends HarnessAwareContext
     {
         $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) {
             Assert::assertEquals(0, count($admin->findElements(By::xpath('//div[contains(@id, "conf") and contains(@id, "delete") and contains(@class, "x-window-default")]'))));
-
         });
     }
 
@@ -261,7 +261,7 @@ class MJRContext extends HarnessAwareContext
         $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($componentType, $tid) {
             $button = $q->extComponentDomId("{$componentType}[tid=$tid]");
 
-            $admin->findElement($button)->click();
+            $admin->findElements($button)[0]->click();
 
             sleep(1);
         });
@@ -447,23 +447,6 @@ JS;
         });
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * @When I select month to :year :month
      */
@@ -537,6 +520,8 @@ JS;
          return firstCmp.getDisplayValue();
     }else if(firstCmp.xtype == 'mfc-datefield') {
         return Ext.Date.format(firstCmp.getValue(), 'l, d M Y');
+    }else if(firstCmp.xtype == 'mfc-header') {
+        return firstCmp.title;
     }else if (firstCmp.xtype == 'button') {
          return firstCmp.text;
     } else if (firstCmp.xtype == 'box') {

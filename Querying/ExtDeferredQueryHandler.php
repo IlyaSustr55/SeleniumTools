@@ -122,6 +122,32 @@ JST;
      *
      * @return string
      */
+    public function extDataviewColumnWithSubstringValue($query, $fieldName, $fieldValue, $timeout = 60)
+    {
+        $stmt = <<<'JST'
+    var dataView = result[0];
+        
+    var index = dataView.getStore().find("%s", /%s/);
+    if (-1 != index) {
+        return dataView.getNode(index).id;
+    }
+JST;
+
+        $stmt = sprintf($stmt, $fieldName, $fieldValue);
+
+        $startTime = time();
+
+        return WebDriverBy::id($this->doRunWhenComponentAvailable($query, $stmt, $startTime, $timeout));
+    }
+
+    /**
+     * @param string $query
+     * @param string $fieldName
+     * @param string $fieldValue
+     * @param int $timeout
+     *
+     * @return string
+     */
     public function extDataviewColumnWithValue($query, $fieldName, $fieldValue, $timeout = 60)
     {
         $stmt = <<<'JST'

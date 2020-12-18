@@ -100,58 +100,6 @@ JS;
         });
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * @When in grid abcd
-     */
-    public function asdasdf()
-    {
-
-        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) {
-            $js = <<<'JS'
-var grid = firstCmp;
-var store = grid.getStore();
-var columns = grid.query("gridcolumn");
-
-var position = -1;
-Ext.each(columns, function(column) {
-    if (-1 === position) {
-        position = store.find(column.dataIndex, '%expectedValue%')
-    }
-});
-
-if (-1 === position) {
-    return false;
-}
-
-var column = grid.down("gridcolumn[text=%columnLabel%]");
-var cellCssSelector = grid.getView().getCellSelector(column);
-var cell = Ext.query(cellCssSelector)[position];
-
-return cell.id;
-JS;
-            $js = str_replace(['%columnLabel%', '%expectedValue%'], [$columnLabel, $expectedText], $js);
-
-            $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
-            $cell = $admin->findElement(By::id($cellDomId));
-            $admin->action()->doubleClick($cell)->perform();
-        });
-    }
-
     /**
      * @When in grid :tid I double-click column :columnLabel at position :position
      */
@@ -965,7 +913,6 @@ JS;
             $admin->findElement(By::id($domId))->click();
         });
     }
-
 
     /**
      * @Then in grid :tid at row :row column :column I see text :expectedText
