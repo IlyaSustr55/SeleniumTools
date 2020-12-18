@@ -216,7 +216,6 @@ class MJRContext extends HarnessAwareContext
     {
         $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) {
             Assert::assertEquals(1, count($admin->findElements(By::xpath('//div[contains(@id, "conf") and contains(@id, "delete") and contains(@class, "x-window-default")]'))));
-
         });
     }
 
@@ -240,14 +239,11 @@ class MJRContext extends HarnessAwareContext
      */
     public function viewIsNotVisible($tid)
     {
-
         $this->runActiveActor(function($admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid) {
             $q->extComponentIsNotVisible("component[tid=$tid]");
 
             sleep(1);
         });
-
-
     }
 
     /**
@@ -337,8 +333,6 @@ class MJRContext extends HarnessAwareContext
         });
     }
 
-
-
     /**
      * @Then in grid :tid row with position :position column :label
      */
@@ -348,16 +342,8 @@ class MJRContext extends HarnessAwareContext
             $dataIndex = $q->runWhenComponentAvailable("grid[tid=$tid] gridcolumn[text=$columnLabel]", 'return firstCmp.dataIndex');
 
             Assert::assertNotNull($dataIndex);
-
-            $givenValue = $q->runWhenComponentAvailable(
-                "grid[tid=$tid]",
-                "var view = firstCmp.getView(); var node = view.getNode($position); console.log('some fucken string', view.getRecord(node).get('$dataIndex')); return view.getRecord(node).get('$dataIndex')"
-            );
         });
     }
-
-
-
 
     /**
      * @Then in grid :tid row with position :position column :label must be empty
@@ -461,7 +447,6 @@ JS;
             $column = $q->extComponentDomId('[text="&#160;OK&#160;"]');
             $admin->findElement($column)->click();
 
-
         });
     }
 
@@ -473,11 +458,16 @@ JS;
         $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) {
             $column = $q->extComponentDomId('button[text="Today"]');
             $admin->findElement($column)->click();
-
-
         });
     }
 
+    /**
+     * @Then text in :tid is equal to
+     */
+    public function viewHasText($tid, PyStringNode $markdown)
+    {
+        $this->iSeeValueInField($markdown->getRaw(), $tid);
+    }
 
     /**
      * @Then I see text :text in :tid
@@ -804,6 +794,9 @@ JS;
         });
     }
 
+    /**
+     * @param $isAuthenticatedCallback
+     */
     private function isActorAuthenticated($isAuthenticatedCallback)
     {
         $this->runActiveActor(function(RemoteWebDriver $admin) use($isAuthenticatedCallback) {
@@ -858,6 +851,7 @@ JS;
 
     /**
      * @When I click :button button in confirmation window
+     * @When I click :button button in alert window
      */
     public function IClickButtonInConfirmationWindow($button)
     {
@@ -1087,12 +1081,6 @@ JS;
 
         });
     }
-
-
-
-
-
-
 
     /**
      * @When I click on view :option
