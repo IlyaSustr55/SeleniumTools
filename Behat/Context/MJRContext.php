@@ -234,6 +234,7 @@ class MJRContext extends HarnessAwareContext
      * @When panel :tid is not visible
      * @When grid :tid is not visible
      * @When window :tid is not visible
+     * @When button :tid is not visible
      *
      * @Then window :tid must be closed
      */
@@ -264,19 +265,20 @@ class MJRContext extends HarnessAwareContext
     }
 
     /**
-     * @When I click :componentType with text :text
+         * @When I click :componentType with text :text
 
-     */
-    public function abcdef($componentType, $text)
-    {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($componentType, $text) {
-            $button = $q->extComponentDomId("{$componentType}[text=$text]");
+         */
+        public function whenIClickComponentWithText($componentType, $text)
+        {
+            $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($componentType, $text) {
+                $button = $q->extComponentDomId("{$componentType}[text=$text]");
 
-            $admin->findElement($button)->click();
+                $admin->findElement($button)->click();
 
-            sleep(1);
-        });
-    }
+                sleep(1);
+            });
+        }
+
 
     /**
      * @When I click close button in :tid
@@ -508,6 +510,8 @@ JS;
             $js = <<<'JS'
     if (firstCmp.xtype == 'combobox' || firstCmp.xtype == 'combo') {
          return firstCmp.getDisplayValue();
+    } else if (firstCmp.xtype == 'panel') {
+         return firstCmp.initialConfig.html.replace(/(?!(\<br\>|\<br\s\/\>))<\/?[^>]+>/g, '');
     }else if(firstCmp.xtype == 'mfc-datefield') {
         return Ext.Date.format(firstCmp.getValue(), 'l, d M Y');
     }else if(firstCmp.xtype == 'mfc-header') {
@@ -529,7 +533,7 @@ JS;
 
             $value = $q->runWhenComponentAvailable("component[tid=$tid]:nth-child({$nth}n)", $js);
 
-            $value = trim($value);
+            $value = strip_tags(trim($value));
 
             var_dump($text, $value, $text == $value);
             //Assert::assertEquals($text, $value);

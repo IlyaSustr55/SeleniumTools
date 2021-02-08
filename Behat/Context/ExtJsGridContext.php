@@ -330,7 +330,7 @@ Ext.each(columns, function(column) {
 
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = view.getCellSelector(column);
-var cell = Ext.query(cellCssSelector)[rowVerticalPosition];
+var cell = Ext.query(cellCssSelector)[rowVerticalPosition]; 
 
 return cell.id;
 JS;
@@ -380,7 +380,7 @@ JS;
      * @When in grid :tid I see a column :columnLabel where one of the cells contain strict match :expectedText text and it is checked checkbox
      * @When in grid :tid I see that :columnLabel group has permission :expectedText
      */
-    public function inGridISeeCellWhereOneOfTheCellsContainStrictMatchOfTextAndChecked($tid, $columnLabel, $expectedText)
+    public function inGridIClickWhereOneOfTheCellsContainStrictMatchOfTextAndChecked($tid, $columnLabel, $expectedText)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
             $js = <<<'JS'
@@ -400,7 +400,6 @@ Ext.each(columns, function(column) {
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = view.getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[rowVerticalPosition];
-
 return cell.id;
 JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
