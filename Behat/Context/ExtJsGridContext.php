@@ -330,7 +330,7 @@ Ext.each(columns, function(column) {
 
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = view.getCellSelector(column);
-var cell = Ext.query(cellCssSelector)[rowVerticalPosition];
+var cell = Ext.query(cellCssSelector)[rowVerticalPosition]; 
 
 return cell.id;
 JS;
@@ -380,7 +380,7 @@ JS;
      * @When in grid :tid I see a column :columnLabel where one of the cells contain strict match :expectedText text and it is checked checkbox
      * @When in grid :tid I see that :columnLabel group has permission :expectedText
      */
-    public function inGridISeeCellWhereOneOfTheCellsContainStrictMatchOfTextAndChecked($tid, $columnLabel, $expectedText)
+    public function inGridIClickWhereOneOfTheCellsContainStrictMatchOfTextAndChecked($tid, $columnLabel, $expectedText)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
             $js = <<<'JS'
@@ -400,7 +400,6 @@ Ext.each(columns, function(column) {
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = view.getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[rowVerticalPosition];
-
 return cell.id;
 JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
@@ -932,7 +931,6 @@ JS;
     {
         $this->inGridIClickARowWhichContainsPieceOfText("settingMenu", $expectedText);
     }
-
     /**
      * @Then in grid :tid at row :row column :column I see text :expectedText
      */
@@ -960,15 +958,12 @@ Ext.each(columns, function(column) {
 var isRowFound = -1 != rowPosition;
 var row = '%row%';
 var column = '%column%';
-console.log(parseInt(row), row);
 
 if(rowPosition === parseInt(row) && columnPosition === parseInt(column) && isRowFound){
      return 1;
 } else {
     return -1;
 }
-
-
 
 JS;
             $js = str_replace(['%expectedText%', '%row%', '%column%'], [$expectedText, $row, $column], $js);
@@ -979,5 +974,4 @@ JS;
 
         });
     }
-
 }
