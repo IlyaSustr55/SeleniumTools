@@ -813,7 +813,7 @@ JS;
 
             $value = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
 
-            var_dump([$value, date('Y-m-d'), date('Y-m-d', strtotime($value))]);
+            if (!date('Y-m-d') == date('Y-m-d', strtotime($value))) var_dump([$value, date('Y-m-d'), date('Y-m-d', strtotime($value))]);
 
             Assert::assertTrue(date('Y-m-d') == date('Y-m-d', strtotime($value)));
 
