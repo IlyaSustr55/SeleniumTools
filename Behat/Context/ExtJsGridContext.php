@@ -142,7 +142,7 @@ return cell.id;
 JS;
             $js = str_replace(['%columnLabel%', '%expectedColumnValue%'], [$columnLabel, $expectedColumnValue], $js);
 
-            $rowId = By::id($q->runWhenComponentAvailable("grid[tid=$tid]", $js));
+            $rowId = By::id($q->runWhenStoreForComponentAvailable("grid[tid=$tid]", $js));
             $row = $admin->findElement($rowId);
             $row->click();
         });
