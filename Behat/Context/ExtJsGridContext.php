@@ -336,7 +336,7 @@ return cell.id;
 JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
 
-            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            $domId = $q->runWhenStoreForComponentAvailable("grid[tid=$tid] ", $js);
 
             $admin->findElement(By::id($domId))->click();
         });
@@ -370,7 +370,7 @@ return cell.id;
 JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
 
-            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            $domId = $q->runWhenStoreForComponentAvailable("grid[tid=$tid] ", $js);
 
             $admin->findElement(By::id($domId))->click();
         });
@@ -439,7 +439,7 @@ return cell.id;
 JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
 
-            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            $domId = $q->runWhenStoreForComponentAvailable("grid[tid=$tid] ", $js);
             $checked = $admin->findElement(By::cssSelector('#' . $domId . ' div img'))->getAttribute('class');
             Assert::assertNotContains('x-grid-checkcolumn-checked', $checked);
         });
