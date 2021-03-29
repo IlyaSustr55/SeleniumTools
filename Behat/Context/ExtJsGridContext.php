@@ -657,6 +657,7 @@ JS;
 //
 //        });
 
+        $expectedText = (string) $expectedText;
 
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $name) {
             $js = <<<'JS'
