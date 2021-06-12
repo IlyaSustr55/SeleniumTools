@@ -890,24 +890,6 @@ JS;
         });
     }
 
-    /**
-     * @When I choose date :date in field by name :tid
-     */
-    public function iChooseDateInFieldByName($date, $tid, $nth = 1)
-    {
-
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $date, $nth) {
-            $js = <<<JS
-var dateField = firstCmp;
-dateField.setValue(new Date('%expectedValue%'));
-return true;
-JS;
-            $js = str_replace(['%expectedValue%'], [$date], $js);
-
-            $q->runWhenComponentAvailable("component[tid=$tid]", $js);
-
-        });
-    }
 
     /**
      * @When I select option :option and option :option2 in combo :tid
@@ -1029,7 +1011,7 @@ JS;
 
 
     /**
-     * @When in combobox :tid i click item with text :text
+     * @When in combobox :tid I click item with text :text
      */
     public function abcd($tid, $text)
     {
