@@ -48,6 +48,8 @@ JS;
             $js = <<<'JS'
 var grid = firstCmp;
 var column = grid.down("gridcolumn[text=Delete]");
+if(column == null)
+    column = grid.down("gridcolumn[text=Remove]");
 var cellCssSelector = grid.getView().getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[%position%];
 return cell.id;
@@ -55,7 +57,7 @@ JS;
             $js = str_replace(['%position%'], [$position], $js);
 
             $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
-            $admin->findElement(By::xpath("//td[@id = '".$cellDomId."']/div/a"))->click();
+            $admin->findElement(By::xpath("//td[@id = '" . $cellDomId . "']/div/*"))->click();
             sleep(2);
         });
     }
@@ -309,7 +311,7 @@ JS;
     }
 
     /**
-     * @When in grid :tid I click a column :columnLabel where one of the cells contain :expectedText piece of text
+     * @When in grid :tid I click a column :columnLabel where one of the cells contains :expectedText piece of text
      */
     public function inGridIClickCellWhereOneOfTheCellsContainPieceOfText($tid, $columnLabel, $expectedText)
     {
@@ -343,7 +345,7 @@ JS;
     }
 
     /**
-     * @When in grid :tid I click a column :columnLabel where one of the cells contain strict match :expectedText text
+     * @When in grid :tid I click a column :columnLabel where one of the cells contains strict match :expectedText text
      */
     public function inGridIClickCellWhereOneOfTheCellsContainStrictMatchOfText($tid, $columnLabel, $expectedText)
     {
@@ -377,7 +379,7 @@ JS;
     }
 
     /**
-     * @When in grid :tid I see a column :columnLabel where one of the cells contain strict match :expectedText text and it is checked checkbox
+     * @When in grid :tid I see a column :columnLabel where one of the cells contains strict match :expectedText text and it is checked checkbox
      * @When in grid :tid I see that :columnLabel group has permission :expectedText
      */
     public function inGridIClickWhereOneOfTheCellsContainStrictMatchOfTextAndChecked($tid, $columnLabel, $expectedText)
@@ -411,7 +413,7 @@ JS;
     }
 
     /**
-     * @When in grid :tid I see a column :columnLabel where one of the cells contain strict match :expectedText text and it is unchecked checkbox
+     * @When in grid :tid I see a column :columnLabel where one of the cells contains strict match :expectedText text and it is unchecked checkbox
      * @When in grid :tid I see that :columnLabel group has not permission :expectedText
      */
     public function inGridISeeCellWhereOneOfTheCellsContainStrictMatchOfTextAndNotChecked($tid, $columnLabel, $expectedText)
@@ -657,7 +659,7 @@ JS;
 //
 //        });
 
-        $expectedText = (string) $expectedText;
+        $expectedText = (string)$expectedText;
 
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $name) {
             $js = <<<'JS'
@@ -669,13 +671,13 @@ JS;
             $js = str_replace(['%name%'], [$name], $js);
 
             $value = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
-            if($expectedText == "nothing") {
+            if ($expectedText == "nothing") {
                 Assert::assertEquals("", $value);
-            } else if($expectedText == "something") {
+            } else if ($expectedText == "something") {
                 Assert::assertNotEquals("", $value);
             } else {
 
-                if ($expectedText != $value) var_dump([$expectedText, $value, $expectedText==$value]);
+                if ($expectedText != $value) var_dump([$expectedText, $value, $expectedText == $value]);
 
                 //Assert::assertEquals($expectedText, $value);
             }
@@ -932,12 +934,13 @@ JS;
     {
         $this->inGridIClickARowWhichContainsPieceOfText("settingMenu", $expectedText);
     }
+
     /**
      * @Then in grid :tid at row :row column :column I see text :expectedText
      */
     public function thenInGridAtRowAtColumn($tid, $expectedText, $row, $column)
     {
-        $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($tid, $expectedText, $row, $column) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $row, $column) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();

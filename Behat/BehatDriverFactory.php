@@ -70,7 +70,7 @@ class BehatDriverFactory implements DriverFactoryInterface
 
         $chromeOptions = new ChromeOptions();
         $chromeOptions->addArguments(array(
-          '--window-size=1880,1000',  '--start-maximized', '--accept-ssl-certs=true', '--disable-dev-shm-usage', '--no-sandbox'
+          '--window-size=1880,1000',  '--start-maximized', '--accept-ssl-certs=true', '--ignore-certificate-errors', '--disable-dev-shm-usage', '--no-sandbox'
 
 //             '--start-maximized', '--accept-ssl-certs=true', '--disable-dev-shm-usage', '--no-sandbox'
         ));
