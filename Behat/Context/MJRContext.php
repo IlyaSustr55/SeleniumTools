@@ -518,22 +518,24 @@ JS;
         return firstCmp.title;
     }else if (firstCmp.xtype == 'button') {
          return firstCmp.text;
-    } else if (firstCmp.xtype == 'box') {
+    }else if (firstCmp.xtype == 'box') {
         if(firstCmp.html != undefined)
             return firstCmp.html;
         else return firstCmp.initialConfig.html;
-    } else if (firstCmp.tid == "totalAccessoriesPrice") {
+    }else if (firstCmp.tid == "totalAccessoriesPrice") {
          return firstCmp.html;
-    }  else if (firstCmp.tid == "message") {
+    }else if (firstCmp.tid == "message") {
          return firstCmp.text.html;
-    } else {
+    }else if (firstCmp.xtype == "tbtext") {
+         return firstCmp.container.dom.innerText;
+    }else {
          return firstCmp.getValue();
     }
 JS;
 
             $value = $q->runWhenComponentAvailable("component[tid=$tid]:nth-child({$nth}n)", $js);
 
-            $value = strip_tags(trim($value));
+            $value = str_replace("\n", "", strip_tags(trim($value)));
 
             var_dump($text, $value, $text == $value);
             //Assert::assertEquals($text, $value);
