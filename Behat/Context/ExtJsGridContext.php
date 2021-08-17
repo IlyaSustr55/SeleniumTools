@@ -696,12 +696,20 @@ JS;
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
-return store.findRecord('readableName', '%name%').get('readableValue');
 
+var value = store.findRecord('readableName', '%name%').get('readableValue').toString();
+if(value == "false") {
+    return "FALSE";
+}else {
+    return value;
+}
 JS;
             $js = str_replace(['%name%'], [$name], $js);
 
             $value = $q->runWhenComponentAvailable("modera-configutils-propertiesgrid", $js);
+            if($value == "FALSE") {
+                $value = "false";
+            }
 
             Assert::assertEquals($expectedText, $value);
 
@@ -819,6 +827,7 @@ JS;
 
             Assert::assertTrue(date('Y-m-d') == date('Y-m-d', strtotime($value)));
 
+            Assert::assertContains();
         });
     }
 
@@ -913,6 +922,7 @@ Ext.each(columns, function(column) {
 
 var isRowFound = -1 != rowPosition;
 if (isRowFound) {
+    console.log(Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[rowPosition]);
     return Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[rowPosition].id;
 } else {
     return -1;
@@ -924,6 +934,31 @@ JS;
             Assert::assertNotEquals(-1, $domId);
 
             $admin->findElement(By::id($domId))->click();
+        });
+    }
+
+    /**
+     * @Then in grid :tid I see row with value :value and it is :state row
+     */
+    public function inGridISeeRowWithValueAndItIsLockedRow($tid, $value, $state)
+    {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $value, $state) {
+            $js = <<<'JS'
+            var rows = firstCmp.getStore().data.items;
+            for(var i = 0; i < rows.length; i++) {
+                console.log(rows[i].data.name + ' === "%value%"', rows[i].data.name === "%value%");
+                if(rows[i].data.name === "%value%") {
+                    return rows[i].data.locked;
+                }
+            }
+    JS;
+            $js = str_replace(['%value%'], [$value], $js);
+
+            $isLocked = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+
+
+
+            Assert::assertEquals($state == "locked"? true: false, $isLocked);
         });
     }
 
