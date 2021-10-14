@@ -827,7 +827,6 @@ JS;
 
             Assert::assertTrue(date('Y-m-d') == date('Y-m-d', strtotime($value)));
 
-            Assert::assertContains();
         });
     }
 
