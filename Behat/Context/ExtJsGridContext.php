@@ -929,7 +929,7 @@ if (isRowFound) {
 JS;
             $js = str_replace(['%expectedText%'], [$expectedText], $js);
 
-            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            $domId = $q->runWhenComponentAvailable("grid[tid='$tid'] ", $js);
             Assert::assertNotEquals(-1, $domId);
 
             $admin->findElement(By::id($domId))->click();
