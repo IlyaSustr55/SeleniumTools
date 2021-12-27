@@ -256,7 +256,7 @@ class MJRContext extends HarnessAwareContext
     public function iClickElementOfType($componentType, $tid)
     {
         $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($componentType, $tid) {
-            $button = $q->extComponentDomId("{$componentType}[tid=$tid]");
+            $button = $q->extComponentDomId("{$componentType}[tid='$tid']");
 
             $admin->findElements($button)[0]->click();
 
