@@ -354,16 +354,24 @@ JST;
 
         // publishing a function once and later just invoking it instead of re-declaring it each time
         $this->driver->executeScript($js);
-        $value = $this->driver->executeScript("return window.$functionName();"); // invoking previously published function
 
-        //if ($value === 'false') {
-            //$this->driver->executeScript("delete window.$functionName;");
-            //throw new \Exception(sprintf(
-            //    'Element with ExtJs query "%s" must be visible. Try to look for this element on the current page.', $query
-            //));
-        //}
+        $timeout = 30;
+        while (true) {
+            $value = $this->driver->executeScript("return window.$functionName();"); // invoking previously published function
 
-        //$this->driver->executeScript("delete window.$functionName;");
+            if ('false' !== $value) {
+                // function is no longer needed so we are removing it from the browser
+                $this->driver->executeScript("delete window.$functionName;");
+
+                return $value;
+            }
+
+            if ((time() - $startTime) > $timeout) {
+                throw new NoElementFoundException(sprintf(
+                    'Unable to locate element with ExtJs query "%s" (waited for %d seconds).', $query, $timeout
+                ));
+            }
+        }
     }
 
     public function executeScript($script, array $arguments = [])
