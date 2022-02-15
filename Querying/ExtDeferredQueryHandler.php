@@ -355,7 +355,9 @@ JST;
         // publishing a function once and later just invoking it instead of re-declaring it each time
         $this->driver->executeScript($js);
 
+        $startTime = time();
         $timeout = 30;
+
         while (true) {
             $value = $this->driver->executeScript("return window.$functionName();"); // invoking previously published function
 
