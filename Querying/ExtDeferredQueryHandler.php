@@ -335,12 +335,13 @@ JST;
         $js = <<<'JST'
 %function_name% = function () {
     var components = Ext.ComponentQuery.query("%query%");
-
-    if (Ext.isEmpty(components)) {
-        return 'true';
-    } else {
-        return 'false';
-    }
+    var notVisible = 'true';
+    Ext.each(components, function(cmp){
+        if (cmp && cmp.isVisible()) {
+            notVisible = 'false';
+        }
+    });
+    return notVisible;
 };
 JST;
 
