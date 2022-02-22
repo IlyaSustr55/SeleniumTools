@@ -503,6 +503,10 @@ JS;
             $nth = 3;
         } else if ($nth == 'fourth') {
             $nth = 4;
+        } else if ($nth == 'fifth') {
+            $nth = 5;
+        } else if ($nth == 'sixth') {
+            $nth = 6;
         }
 
         $this->runActiveActor(function(RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use($text, $tid, $nth) {
