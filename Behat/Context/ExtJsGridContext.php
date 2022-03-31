@@ -921,7 +921,6 @@ Ext.each(columns, function(column) {
 
 var isRowFound = -1 != rowPosition;
 if (isRowFound) {
-    console.log(Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[rowPosition]);
     return Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[rowPosition].id;
 } else {
     return -1;
@@ -929,7 +928,7 @@ if (isRowFound) {
 JS;
             $js = str_replace(['%expectedText%'], [$expectedText], $js);
 
-            $domId = $q->runWhenComponentAvailable("grid[tid='$tid'] ", $js);
+            $domId = $q->runWhenComponentAvailable("grid[tid='$tid']{getStore().isLoading() == false}", $js);
             Assert::assertNotEquals(-1, $domId);
 
             $admin->findElement(By::id($domId))->click();
@@ -945,7 +944,6 @@ JS;
             $js = <<<'JS'
             var rows = firstCmp.getStore().data.items;
             for(var i = 0; i < rows.length; i++) {
-                console.log(rows[i].data.name + ' === "%value%"', rows[i].data.name === "%value%");
                 if(rows[i].data.name === "%value%") {
                     return rows[i].data.locked;
                 }
@@ -954,8 +952,6 @@ JS;
             $js = str_replace(['%value%'], [$value], $js);
 
             $isLocked = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
-
-
 
             Assert::assertEquals($state == "locked"? true: false, $isLocked);
         });
@@ -977,7 +973,6 @@ JS;
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $row, $column) {
             $js = <<<'JS'
 var grid = firstCmp;
-var view = grid.getView();
 var store = grid.getStore();
 var columns = grid.query("gridcolumn");
 
