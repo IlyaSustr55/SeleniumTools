@@ -246,7 +246,7 @@ class Actor
             call_user_func_array($callback, $args);
         } catch (\Exception $e) {
             throw new ActorExecutionException(
-                sprintf('An error occurred when executing "%s" actor: %s', $this->name, $e->getMessage()), null, $e
+                sprintf('An error occurred when executing "%s" actor: %s, exection type: %s', $this->name, $e->getMessage(), get_class($e)), null, $e
             );
         }
 

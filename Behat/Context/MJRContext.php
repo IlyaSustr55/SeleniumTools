@@ -6,6 +6,7 @@ use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
+use Facebook\WebDriver\Support\XPathEscaper;
 use Modera\Component\SeleniumTools\TestHarness;
 use Modera\Component\SeleniumTools\Actor;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
@@ -15,6 +16,8 @@ use Modera\Component\SeleniumTools\Querying\By;
 use Facebook\WebDriver\WebDriverKeys;
 use PHPUnit\Framework\Assert;
 use Symfony\Component\Filesystem\Exception\IOException;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverExpectedCondition;
 
 /**
  * Defines application features from the specific context.
@@ -113,7 +116,7 @@ class MJRContext extends HarnessAwareContext
     public function iClickOnCloseButtonInTheSessionExpiredNotificationWindow()
     {
         $this->runActiveActor(function (RemoteWebDriver $admin, Actor $actor, MJRBackendPageObject $backend, ExtDeferredQueryHandler $q) {
-            $button = $q->extComponentDomId('window[tid=authRequiredWindow] component[tid=closeWindowBtn]');
+            $button = $q->extComponentDomId('window[tid=authRequiredWindow] component[tid=closeWindowBtn]{isDisabled() == false}{isVisible() == true}');
 
             $admin->findElement($button)->click();
 
@@ -151,7 +154,7 @@ class MJRContext extends HarnessAwareContext
     public function windowIsNoLongerDisplayed()
     {
         $this->runActiveActor(function (RemoteWebDriver $admin, Actor $actor, MJRBackendPageObject $backend, ExtDeferredQueryHandler $q) {
-            Assert::assertNull($admin->executeScript('Ext.ComponentQuery.query("window[tid=authRequiredWindow]")[0]'));
+            $this->viewIsNotVisible('authRequiredWindow');
         });
     }
 
@@ -214,8 +217,8 @@ class MJRContext extends HarnessAwareContext
      */
     public function ISeeDeleteConfirmationWindow()
     {
-        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) {
-            Assert::assertEquals(1, count($admin->findElements(By::xpath('//div[contains(@id, "conf") and contains(@id, "delete") and contains(@class, "x-window-default")]'))));
+        $this->runActiveActor(function ($admin, $actor, $backend, ExtDeferredQueryHandler $q) {
+            $q->runWhenComponentAvailable("mfc-window-deleterecordconfwindow");
         });
     }
 
@@ -224,8 +227,8 @@ class MJRContext extends HarnessAwareContext
      */
     public function IDontSeeDeleteConfirmationWindow()
     {
-        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) {
-            Assert::assertEquals(0, count($admin->findElements(By::xpath('//div[contains(@id, "conf") and contains(@id, "delete") and contains(@class, "x-window-default")]'))));
+        $this->runActiveActor(function ($admin, $actor, $backend, ExtDeferredQueryHandler $q) {
+            $q->extComponentIsNotVisible("mfc-window-deleterecordconfwindow");
         });
     }
 
@@ -292,10 +295,12 @@ class MJRContext extends HarnessAwareContext
     public function iClickElementOfType($componentType, $tid)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($componentType, $tid) {
-            $button = $q->extComponentDomId("{$componentType}[tid='$tid']");
-
+            $expression = '';
+            if ($componentType == 'button' || $componentType == 'menuitem') {
+                $expression = '{isDisabled() == false}{isVisible() == true}';
+            }
+            $button = $q->extComponentDomId("{$componentType}[tid='$tid']$expression");
             $admin->findElements($button)[0]->click();
-
             sleep(1);
         });
     }
@@ -309,7 +314,6 @@ class MJRContext extends HarnessAwareContext
             $column = $q->extComponentDomId("grid[tid=$tid] gridcolumn[text=$text]");
 
             $admin->findElement($column)->click();
-
             sleep(1);
         });
     }
@@ -515,6 +519,12 @@ JS;
     } else if (firstCmp.xtype == 'panel') {
          return firstCmp.initialConfig.html.replace(/(?!(\<br\>|\<br\s\/\>))<\/?[^>]+>/g, '');
     } else if(firstCmp.xtype == 'mfc-datefield' || firstCmp.xtype == 'datefield') {
+    
+        var value = firstCmp.getValue();
+        if (value && typeof value === 'string') {
+            return value;
+        }
+    
         return Ext.Date.format(firstCmp.getValue(), 'l, d M Y');
     } else if(firstCmp.xtype == 'mfc-header') {
         return firstCmp.title;
@@ -539,7 +549,7 @@ JS;
 
             $value = str_replace("\n", "", strip_tags(trim($value)));
 
-            var_dump($text, $value, $text == $value);
+            if ($text != $value) var_dump($text, $value, $text == $value);
             //Assert::assertEquals($text, $value);
 
         });
@@ -715,12 +725,51 @@ JS;
     }
 
     /**
-     * @Then I see a piece of text :text
+     * @Then I see a badge with text :text
      */
-    public function iSeePieceOfText($text)
+    public function iSeeBadgeWithText($text)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin) use ($text) {
-            Assert::assertContains($text, $admin->getPageSource());
+
+            var_dump(WebDriverBy::xpath(
+                sprintf(
+                    '//div[contains(@class, "tag") and contains(text(), %s)]',
+                    XPathEscaper::escapeQuotes($text)
+                )
+            ));
+
+
+            $admin->wait()->until(WebDriverExpectedCondition::visibilityOfAnyElementLocated(WebDriverBy::xpath(
+                sprintf(
+                    '//div[contains(@class, "tag") and contains(text(), %s)]',
+                    XPathEscaper::escapeQuotes($text)
+                )
+            )));
+        });
+    }
+
+    /**
+     * @Then I do not see a badge with text :text
+     */
+    public function iDoNotSeeBadgeWithText($text)
+    {
+        $this->runActiveActor(function (RemoteWebDriver $admin) use ($text) {
+            $admin->wait()->until(WebDriverExpectedCondition::not(WebDriverExpectedCondition::visibilityOfAnyElementLocated(WebDriverBy::xpath(
+                sprintf(
+                    '//div[contains(@class, "tag-") and contains(text(), "%s")]',
+                    XPathEscaper::escapeQuotes($text)
+                )
+            ))));
+        });
+    }
+
+    /**
+     * @Then I see a piece of text :text
+     */
+    public function iSeeTagText($text)
+    {
+        $this->runActiveActor(function (RemoteWebDriver $admin) use ($text) {
+            $admin->wait()->until(WebDriverExpectedCondition::elementTextContains(WebDriverBy::tagName('body'), $text));
         });
     }
 
@@ -877,10 +926,10 @@ JS;
     /**
      * @When I choose date :date in field :tid
      */
-    public function iChooseDateInField($date, $tid, $nth = 1)
+    public function iChooseDateInField($date, $tid)
     {
 
-        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $date, $nth) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $date) {
             $js = <<<JS
 var dateField = firstCmp;
 dateField.setValue(new Date('%expectedValue%'));
@@ -911,7 +960,7 @@ JS;
             $nth = 4;
         }
 
-        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $option, $nth) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $option, $option2, $nth) {
             $js = <<<JS
 var combo = firstCmp;
 var store = combo.getStore();
@@ -955,21 +1004,21 @@ JS;
 var combo = firstCmp;
 var store = combo.getStore();
 
+if (store.isLoading()) {
+    return 'false';
+}
 
-  try {
-
-        var record = store.findRecord(combo.displayField, '%expectedValue%');
-        if (!record) {
-            throw "Unable to find a record where option value is equal to '%expectedValue%'.";
-        }
-        combo.setValue(record);
-
-  } catch (e) {
-      if ('Eesti (Eesti)' == '%expectedValue%') {
-          alert([e, store.getCount(), store.getAt(0)]);
-      }
-  }
-
+try {
+    var record = store.findRecord(combo.displayField, '%expectedValue%');
+    if (!record) {
+        throw "Unable to find a record where option value is equal to '%expectedValue%'.";
+    }
+    combo.setValue(record);
+} catch (e) {
+    if ('Eesti (Eesti)' == '%expectedValue%') {
+        alert([e, store.getCount(), store.getAt(0)]);
+    }
+}
 
 return true;
 JS;

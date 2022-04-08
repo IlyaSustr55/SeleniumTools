@@ -55,7 +55,7 @@ class ExtDeferredQueryHandler
 
         $id = WebDriverBy::id($id);
 
-        // so we are waiting for some time until ExtJs has generated requred Dom and flushed it so
+        // so we are waiting for some time until ExtJs has generated required Dom and flushed it so
         // we can really access and manipulate it
         $this->driver->wait()->until(WebDriverExpectedCondition::presenceOfElementLocated($id));
 
@@ -222,12 +222,18 @@ JST;
         // If we return a boolean value from a function then we will get
         // "java.lang.Boolean cannot be cast to java.lang.String" exception by Selenium, so to address this issue
         // we are returning a 'false' as a string instead
+
+        // maybe can be added later:
+        //
         $js = $js ?? <<<'JST'
 %function_name% = function () {
     var result = [];
     var components = Ext.ComponentQuery.query("%query%");
     Ext.each(components, function(component) {
-        if (component.isVisible(true)) {
+        if (component.isVisible(true) && 
+            (typeof component.getStore !== 'function' || !component.getStore().isLoading()) &&
+            (typeof component.loadMask === 'undefined' || !component.loadMask || typeof component.loadMask.isVisible !== 'function' || !component.loadMask.isVisible()) &&
+            (!Ext.ComponentQuery.query('component[loadMask]{hasOwnProperty("loadMask")}{loadMask!=undefined}{loadMask!=null}{loadMask.isVisible}{loadMask.isVisible()} component[id='+component.getId()+']').length)) {
             result.push(component);
         }
     });
@@ -371,7 +377,7 @@ JST;
 
             if ((time() - $startTime) > $timeout) {
                 throw new NoElementFoundException(sprintf(
-                    'Unable to locate element with ExtJs query "%s" (waited for %d seconds).', $query, $timeout
+                    'Element with ExtJs query "%s" still displayed (waited for %d seconds).', $query, $timeout
                 ));
             }
         }

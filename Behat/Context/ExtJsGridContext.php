@@ -28,7 +28,9 @@ var grid = firstCmp;
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = grid.getView().getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[%position%];
-
+if (!cell || !cell.id) {
+    return 'false';
+}
 return cell.id;
 JS;
             $js = str_replace(['%columnLabel%', '%position%'], [$columnLabel, $position], $js);
@@ -48,8 +50,7 @@ JS;
             $js = <<<'JS'
 var grid = firstCmp;
 var column = grid.down("gridcolumn[text=Delete]");
-if(column == null)
-    column = grid.down("gridcolumn[text=Remove]");
+if (column == null) column = grid.down("gridcolumn[text=Remove]");
 var cellCssSelector = grid.getView().getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[%position%];
 return cell.id;
@@ -82,13 +83,15 @@ Ext.each(columns, function(column) {
 });
 
 if (-1 === position) {
-    return false;
+    return 'false';
 }
 
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = grid.getView().getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[position];
-
+if (!cell || !cell.id) {
+    return 'false';
+}
 return cell.id;
 JS;
             $js = str_replace(['%columnLabel%', '%expectedValue%'], [$columnLabel, $expectedText], $js);
@@ -110,7 +113,9 @@ var grid = firstCmp;
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = grid.getView().getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[%position%];
-
+if (!cell || !cell.id) {
+    return 'false';
+}
 return cell.id;
 JS;
             $js = str_replace(['%columnLabel%', '%position%'], [$columnLabel, $position], $js);
@@ -129,9 +134,7 @@ JS;
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $columnLabel, $expectedColumnValue) {
             $js = <<<JS
 var grid = firstCmp;
-var view = grid.getView();
 var column = grid.down('gridcolumn[text=%columnLabel%]');
-
 var rowPosition = grid.getStore().find(column.dataIndex, '%expectedColumnValue%');
 if (-1 == rowPosition) {
     throw "Unable to find a record where '%columnLabel%' column's value is equal to '%expectedColumnValue%'." ;
@@ -139,12 +142,14 @@ if (-1 == rowPosition) {
 
 var cellCssSelector = grid.getView().getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[rowPosition];
-
+if (!cell || !cell.id) {
+    return 'false';
+}
 return cell.id;
 JS;
             $js = str_replace(['%columnLabel%', '%expectedColumnValue%'], [$columnLabel, $expectedColumnValue], $js);
 
-            $rowId = By::id($q->runWhenStoreForComponentAvailable("grid[tid=$tid]", $js));
+            $rowId = By::id($q->runWhenComponentAvailable("grid[tid=$tid]", $js));
             $row = $admin->findElement($rowId);
             $row->click();
         });
@@ -173,13 +178,19 @@ JS;
 
     /**
      * @Then grid :tid must contain at least :rowsCount rows
+     * @Then grid :tid must contain at least :rowsCount row
      */
     public function gridMustContainAtLeastNRows($tid, $rowsCount)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $rowsCount) {
-            $query = "grid[tid=$tid]";
-
-            Assert::assertGreaterThanOrEqual($rowsCount, $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();'));
+            try {
+                $query = sprintf("grid[tid=$tid]{getStore().getCount()>=%s}", (int) $rowsCount);
+                $count = $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();', 25);
+            } catch (\Exception $e) {
+                $query = "grid[tid=$tid]}";
+                $count = $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();', 10);
+            }
+            Assert::assertGreaterThanOrEqual($rowsCount, $count);
         });
     }
 
@@ -188,7 +199,7 @@ JS;
      */
     public function gridMustContainRowWithValue($tid, $expectedValue)
     {
-        Assert::assertTrue($this->isRowWithTextFoundInGrid($tid, $expectedValue));
+        Assert::assertTrue($this->isRowWithTextFoundInGrid($tid, $expectedValue, true));
     }
 
     /**
@@ -196,14 +207,14 @@ JS;
      */
     public function gridMustNotContainRowWithValue($tid, $expectedValue)
     {
-        Assert::assertFalse($this->isRowWithTextFoundInGrid($tid, $expectedValue));
+        Assert::assertTrue($this->isRowWithTextFoundInGrid($tid, $expectedValue, false));
     }
 
-    private function isRowWithTextFoundInGrid($tid, $expectedValue)
+    private function isRowWithTextFoundInGrid($tid, $expectedValue, $exists)
     {
         $isFound = false;
 
-        $this->runActiveActor(function ($admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedValue, &$isFound) {
+        $this->runActiveActor(function ($admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedValue, &$isFound, $exists) {
             $js = <<<'JS'
             var grid = firstCmp;
             var store = grid.getStore();
@@ -213,16 +224,17 @@ JS;
             Ext.each(columns, function(column) {
                 if (-1 != store.find(column.dataIndex, '%expectedValue%')) {
                     isFound = true;
-            
                     return false;
                 }
             });
             
-            return isFound;
+            return (isFound && %exists%) || (!isFound && !%exists%) ? true : 'false';
 JS;
-            $js = str_replace(['%expectedValue%'], [$expectedValue], $js);
+            $js = str_replace(['%expectedValue%', '%exists%'], [$expectedValue, ($exists?'1':'0')], $js);
 
-            $isFound = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            $q->runWhenComponentAvailable("grid[tid=$tid]", $js);
+
+            $isFound = true;
         });
 
         return $isFound;
@@ -244,7 +256,7 @@ var isRowFound = -1 != rowPosition;
 if (isRowFound) {
     return Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[rowPosition].id;
 } else {
-    return -1;
+    return 'false';
 }
 JS;
             $js = str_replace(['%expectedText%'], [$expectedText], $js);
@@ -253,7 +265,6 @@ JS;
             Assert::assertNotEquals(-1, $domId);
 
             $button = $admin->findElement(By::id($domId));
-
 
             $admin->action()
                 ->moveToElement($button, 10, 10)
@@ -271,12 +282,16 @@ JS;
      */
     public function inGridIClickRowAtPosition($tid, $position)
     {
+        usleep(500000);
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $position) {
             $js = <<<'JS'
 var grid = firstCmp;
 var view = grid.getView();
-
-return Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[%position%].id;
+var cell = Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[%position%];
+if (!cell || !cell.id) {
+    return 'false';
+}
+return cell.id;
 JS;
             $js = str_replace(['%position%'], [$position], $js);
 
@@ -332,13 +347,15 @@ Ext.each(columns, function(column) {
 
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = view.getCellSelector(column);
-var cell = Ext.query(cellCssSelector)[rowVerticalPosition]; 
-
+var cell = Ext.query(cellCssSelector)[rowVerticalPosition];
+if (!cell || !cell.id) {
+    return 'false';
+}
 return cell.id;
 JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
 
-            $domId = $q->runWhenStoreForComponentAvailable("grid[tid=$tid] ", $js);
+            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
 
             $admin->findElement(By::id($domId))->click();
         });
@@ -367,12 +384,14 @@ Ext.each(columns, function(column) {
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = view.getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[rowVerticalPosition];
-
+if (!cell || !cell.id) {
+    return 'false';
+}
 return cell.id;
 JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
 
-            $domId = $q->runWhenStoreForComponentAvailable("grid[tid=$tid] ", $js);
+            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
 
             $admin->findElement(By::id($domId))->click();
         });
@@ -402,6 +421,9 @@ Ext.each(columns, function(column) {
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = view.getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[rowVerticalPosition];
+if (!cell || !cell.id) {
+    return 'false';
+}
 return cell.id;
 JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
@@ -436,12 +458,14 @@ Ext.each(columns, function(column) {
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = view.getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[rowVerticalPosition];
-
+if (!cell || !cell.id) {
+    return 'false';
+}
 return cell.id;
 JS;
             $js = str_replace(['%expectedText%', '%columnLabel%'], [$expectedText, $columnLabel], $js);
 
-            $domId = $q->runWhenStoreForComponentAvailable("grid[tid=$tid] ", $js);
+            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             $checked = $admin->findElement(By::cssSelector('#' . $domId . ' div img'))->getAttribute('class');
             Assert::assertNotContains('x-grid-checkcolumn-checked', $checked);
         });
@@ -453,9 +477,14 @@ JS;
     public function gridMustContainRows($tid, $rowsCount)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $rowsCount) {
-            $query = "grid[tid=$tid]";
-
-            Assert::assertEquals($rowsCount, $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();'));
+            try {
+                $query = sprintf("grid[tid=$tid]{getStore().getCount()==%s}", (int) $rowsCount);
+                $count = $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();', 25);
+            } catch (\Exception $e) {
+                $query = "grid[tid=$tid]}";
+                $count = $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();', 10);
+            }
+            Assert::assertEquals($rowsCount, $count);
         });
     }
 
@@ -515,7 +544,7 @@ JS;
 
             $js = str_replace(['%expectedText%'], [$expectedText], $js);
 
-            $domId = $q->runWhenStoreForComponentAvailable("grid[tid=$tid] ", $js);
+            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             Assert::assertNotEquals(-1, $domId);
 
             $el = $admin->findElement(By::id($domId));
@@ -594,7 +623,6 @@ JS;
 
             sleep(1);
 
-
             $isEditorCombo = $q->runWhenComponentAvailable("editor[editing=true]", $jsChange);
 
             if (!$isEditorCombo) {
@@ -665,8 +693,11 @@ JS;
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
-return store.findRecord('name', '%name%').get('value');
-
+var record = store.findRecord('name', '%name%');
+if (!record) {
+    return 'false';
+}
+return record.get('value');
 JS;
             $js = str_replace(['%name%'], [$name], $js);
 
@@ -698,9 +729,9 @@ var grid = firstCmp;
 var store = grid.getStore();
 
 var value = store.findRecord('readableName', '%name%').get('readableValue').toString();
-if(value == "false") {
+if (value == "false") {
     return "FALSE";
-}else {
+} else {
     return value;
 }
 JS;
@@ -882,12 +913,16 @@ Ext.each(columns, function(column) {
 });
 
 if (-1 === position) {
-    return false;
+    return 'false';
 }
 
 var column = grid.down("gridcolumn[text=%columnLabel%]");
 var cellCssSelector = grid.getView().getCellSelector(column);
 var cell = Ext.query(cellCssSelector)[position];
+
+if (!cell || !cell.id) {
+    return 'false';
+}
 
 return cell.id;
 JS;
@@ -923,7 +958,7 @@ var isRowFound = -1 != rowPosition;
 if (isRowFound) {
     return Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[rowPosition].id;
 } else {
-    return -1;
+    return 'false';
 }
 JS;
             $js = str_replace(['%expectedText%'], [$expectedText], $js);
@@ -982,8 +1017,7 @@ Ext.each(columns, function(column) {
     rowPosition = store.find(column.dataIndex, '%expectedText%', 0, true);
     if (-1 != rowPosition) {
         return false;
-    }
-    else {
+    } else {
         columnPosition++;
     }
 });
@@ -992,18 +1026,18 @@ var isRowFound = -1 != rowPosition;
 var row = '%row%';
 var column = '%column%';
 
-if(rowPosition === parseInt(row) && columnPosition === parseInt(column) && isRowFound){
+if (rowPosition === parseInt(row) && columnPosition === parseInt(column) && isRowFound){
      return 1;
 } else {
-    return -1;
+    return 'false';
 }
 
 JS;
             $js = str_replace(['%expectedText%', '%row%', '%column%'], [$expectedText, $row, $column], $js);
 
-            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            $result = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             sleep(1);
-            Assert::assertEquals(1, $domId);
+            Assert::assertEquals(1, $result);
 
         });
     }

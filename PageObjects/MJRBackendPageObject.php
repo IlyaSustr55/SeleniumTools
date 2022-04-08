@@ -3,8 +3,10 @@
 namespace Modera\Component\SeleniumTools\PageObjects;
 
 use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
 use Modera\Component\SeleniumTools\Querying\By;
 use Modera\Component\SeleniumTools\Querying\ExtDeferredQueryHandler;
+use Facebook\WebDriver\WebDriverExpectedCondition;
 
 /**
  * Provides a high-level abstraction to most common actions you will need to perform when writing tests for MJR
@@ -64,8 +66,11 @@ class MJRBackendPageObject
      */
     public function login($username, $password)
     {
-        $sleep = 500000; // half second
+        $this->driver->wait(50, 1000)->until(
+            WebDriverExpectedCondition::visibilityOfElementLocated(By::named(['field', 'User ID']))
+        );
 
+        $sleep = 500000; // half second
         $this->typeInUsername($username);
         usleep($sleep);
         $this->typeInPassword($password);
