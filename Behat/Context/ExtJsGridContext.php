@@ -479,9 +479,9 @@ JS;
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $rowsCount) {
             try {
                 $query = sprintf("grid[tid=$tid]{getStore().getCount()==%s}", (int) $rowsCount);
-                $count = $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();', 25);
+                $count = $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();', 45);
             } catch (\Exception $e) {
-                $query = "grid[tid=$tid]}";
+                $query = "grid[tid=$tid]";
                 $count = $q->runWhenComponentAvailable($query, 'return firstCmp.getStore().getCount();', 10);
             }
             Assert::assertEquals($rowsCount, $count);
