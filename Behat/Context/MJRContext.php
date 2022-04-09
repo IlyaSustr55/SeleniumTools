@@ -769,7 +769,7 @@ JS;
     public function iWaitPieceOfTextToBeVisible($text)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin) use ($text) {
-            $admin->wait(300, 500000)->until(
+            $admin->wait(300, 500)->until(
                 WebDriverExpectedCondition::elementTextContains(WebDriverBy::tagName('body'), $text)
             );
         });
