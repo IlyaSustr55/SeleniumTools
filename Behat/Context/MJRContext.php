@@ -781,7 +781,7 @@ JS;
     public function iSeePieceOfText($text)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin) use ($text) {
-            $admin->wait()->until(WebDriverExpectedCondition::elementTextContains(WebDriverBy::tagName('body'), $text), );
+            $admin->wait()->until(WebDriverExpectedCondition::elementTextContains(WebDriverBy::tagName('body'), $text));
         });
     }
 
