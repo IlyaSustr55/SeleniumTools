@@ -764,12 +764,24 @@ JS;
     }
 
     /**
-     * @Then I see a piece of text :text
+     * @Then I wait for a piece of text :text to be visible
      */
-    public function iSeeTagText($text)
+    public function iWaitPieceOfTextToBeVisible($text)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin) use ($text) {
-            $admin->wait()->until(WebDriverExpectedCondition::elementTextContains(WebDriverBy::tagName('body'), $text));
+            $admin->wait(300, 500000)->until(
+                WebDriverExpectedCondition::elementTextContains(WebDriverBy::tagName('body'), $text)
+            );
+        });
+    }
+
+    /**
+     * @Then I see a piece of text :text
+     */
+    public function iSeePieceOfText($text)
+    {
+        $this->runActiveActor(function (RemoteWebDriver $admin) use ($text) {
+            $admin->wait()->until(WebDriverExpectedCondition::elementTextContains(WebDriverBy::tagName('body'), $text), );
         });
     }
 
