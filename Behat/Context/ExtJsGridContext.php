@@ -812,7 +812,7 @@ JS;
                 $value = date('Y-m-d', strtotime($value));
             }
             if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $expectedText)) {
-                $value = date('Y-m-d', strtotime($expectedText));
+                $expectedText = date('Y-m-d', strtotime($expectedText));
             }
 
             if ($expectedText != $value) var_dump($value, $expectedText);
