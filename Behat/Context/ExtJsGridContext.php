@@ -541,7 +541,6 @@ JS;
 
             $jsChange = str_replace(['%expectedValue%'], [$value], $jsChange);
 
-
             $js = str_replace(['%expectedText%'], [$expectedText], $js);
 
             $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
@@ -549,9 +548,10 @@ JS;
 
             $el = $admin->findElement(By::id($domId));
             $el->getLocationOnScreenOnceScrolledIntoView();
-            $el->click();
 
-            sleep(1);
+            usleep(500000);
+            $el->click();
+            usleep(500000);
 
             $isEditorCombo = $q->runWhenComponentAvailable("editor[editing=true]", $jsChange);
 
@@ -808,6 +808,15 @@ JS;
 
             $value = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
 
+            if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $value)) {
+                $parsedDate = date_parse_from_format("d.m.Y", $value);
+                $value = date('Y-m-d', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
+            }
+            if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $expectedText)) {
+                $parsedDate = date_parse_from_format("d.m.Y", $expectedText);
+                $expectedText = date('Y-m-d', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
+            }
+
             if ($expectedText != $value) var_dump($value, $expectedText);
 
             Assert::assertTrue($value != 'null' && $value != '' && $value != 'false' && $value != '-');
@@ -928,7 +937,7 @@ return cell.id;
 JS;
             $js = str_replace(['%columnLabel%', '%expectedValue%'], [$columnLabel, $expectedText], $js);
 
-            $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid]", $js);
             $cell = $admin->findElement(By::id($cellDomId));
             $admin->action()->click($cell)->perform();
         });
