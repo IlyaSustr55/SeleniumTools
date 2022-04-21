@@ -809,12 +809,10 @@ JS;
             $value = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
 
             if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $value)) {
-                $parsedDate = date_parse_from_format("d.m.Y", $value);
-                $value = date('Y-m-d', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
+                $value = date('Y-m-d', strtotime($value));
             }
             if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $expectedText)) {
-                $parsedDate = date_parse_from_format("d.m.Y", $expectedText);
-                $expectedText = date('Y-m-d', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
+                $value = date('Y-m-d', strtotime($expectedText));
             }
 
             if ($expectedText != $value) var_dump($value, $expectedText);
