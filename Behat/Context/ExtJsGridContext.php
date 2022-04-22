@@ -641,6 +641,8 @@ JS;
         });
     }
 
+
+
     /**
      * @Then in grid :tid I see :expectedText in row :name
      * @Then in grid :tid I see :expectedText as value for :name
@@ -791,29 +793,64 @@ JS;
         });
     }
 
+    public function scrollToPropertyRow($tid, $expectedText)
+    {
+
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($expectedText, $tid) {
+            $js = <<<'JS'
+var grid = firstCmp;
+var view = grid.getView();
+var store = grid.getStore();
+
+var rowPosition = store.findExact('name', '%expectedText%');
+
+var isRowFound = -1 != rowPosition;
+if (isRowFound) {
+    return Ext.query('#'+grid.el.dom.id+' '+view.getDataRowSelector())[rowPosition].id;
+} else {
+    return -1;
+}
+
+JS;
+
+            $js = str_replace(['%expectedText%'], [$expectedText], $js);
+
+            $domId = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
+            Assert::assertNotEquals(-1, $domId);
+
+            $el = $admin->findElement(By::id($domId));
+            $el->getLocationOnScreenOnceScrolledIntoView();
+
+            sleep(1);
+
+        });
+    }
+
     /**
      * @Then in grid :tid I see date :expectedText in row :name
      */
     public function inGridISeeDateValue($tid, $expectedText, $name)
     {
 
+        //$this->scrollToPropertyRow($tid, $name);
+
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $name, $expectedText) {
             $js = <<<'JS'
 var grid = firstCmp;
 var store = grid.getStore();
-return store.findRecord('name', '%name%', 0, true).get('value');
+return store.findRecord('name', '%name%', 0, true, true, true).get('value');
 
 JS;
             $js = str_replace(['%name%'], [$name], $js);
 
             $value = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
-
             if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $value)) {
                 $parsedDate = date_parse_from_format("d.m.Y", $value);
                 $value = date('Y-m-d', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
             }
             if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $expectedText)) {
                 $parsedDate = date_parse_from_format("d.m.Y", $expectedText);
+                var_dump($expectedText, $parsedDate);
                 $expectedText = date('Y-m-d', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
             }
 

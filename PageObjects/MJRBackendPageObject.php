@@ -77,6 +77,12 @@ class MJRBackendPageObject
         usleep($sleep);
         $this->clickSignInButton();
         usleep($sleep);
+
+        try {
+            $this->driver->wait(50, 1000)->until(
+                WebDriverExpectedCondition::invisibilityOfElementLocated(By::named(['field', 'User ID']))
+            );
+        } catch (\Exception $e) {}
     }
 
     /**
