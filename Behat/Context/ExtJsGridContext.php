@@ -863,6 +863,11 @@ JS;
 
             $value = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
 
+            if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $value)) {
+                $parsedDate = date_parse_from_format("d.m.Y", $value);
+                $value = date('Y-m-d', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
+            }
+
             if (date('Y-m-d') != date('Y-m-d', strtotime($value))) var_dump([$value, date('Y-m-d'), date('Y-m-d', strtotime($value))]);
 
             Assert::assertTrue(date('Y-m-d') == date('Y-m-d', strtotime($value)));
