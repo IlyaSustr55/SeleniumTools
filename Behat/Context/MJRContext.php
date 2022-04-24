@@ -1020,17 +1020,11 @@ if (store.isLoading()) {
     return 'false';
 }
 
-try {
-    var record = store.findRecord(combo.displayField, '%expectedValue%');
-    if (!record) {
-        throw "Unable to find a record where option value is equal to '%expectedValue%'.";
-    }
-    combo.setValue(record);
-} catch (e) {
-    if ('Eesti (Eesti)' == '%expectedValue%') {
-        alert([e, store.getCount(), store.getAt(0)]);
-    }
+var record = store.findRecord(combo.displayField, '%expectedValue%');
+if (!record) {
+    return 'false';
 }
+combo.setValue(record);
 
 return true;
 JS;
