@@ -553,7 +553,14 @@ JS;
             $el->click();
             usleep(500000);
 
-            $isEditorCombo = $q->runWhenComponentAvailable("editor[editing=true]", $jsChange);
+            try {
+                $isEditorCombo = $q->runWhenComponentAvailable("editor[editing=true]", $jsChange, 15);
+            } catch (\Exception $e) {
+                // just next try
+                $el->click();
+                usleep(500000);
+                $isEditorCombo = $q->runWhenComponentAvailable("editor[editing=true]", $jsChange, 15);
+            }
 
             if (!$isEditorCombo) {
                 // true
