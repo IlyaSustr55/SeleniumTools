@@ -7,7 +7,6 @@ use Behat\Behat\EventDispatcher\Event\BeforeScenarioTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioLikeTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Behat\Hook\Call\BeforeScenario;
-use Doctrine\Common\Inflector\Inflector;
 use Modera\Component\SeleniumTools\VideoRecording\GuzzleClientTrait;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use GuzzleHttp\Client;
