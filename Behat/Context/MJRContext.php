@@ -549,6 +549,8 @@ JS;
 
             $value = str_replace("\n", "", strip_tags(trim($value)));
 
+            $text = str_replace("TODAY_DATE", date("d.m.Y"), $text);
+
             if ($text != $value) var_dump($text, $value, $text == $value);
             //Assert::assertEquals($text, $value);
 

@@ -564,7 +564,10 @@ JS;
 
             if (!$isEditorCombo) {
                 // true
-                $admin->switchTo()->activeElement()->clear();
+                $admin->switchTo()->activeElement();
+                for($i = 0; $i<100; $i++) {
+                    $admin->getKeyboard()->sendKeys(WebDriverKeys::BACKSPACE);
+                }
                 $admin->getKeyboard()->sendKeys($value);
             }
 

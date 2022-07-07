@@ -214,7 +214,11 @@ JST;
 
         $startTime = time();
 
-        return WebDriverBy::id($this->doRunWhenComponentAvailable($query, $stmt, $startTime, $timeout));
+        $id = WebDriverBy::id($this->doRunWhenComponentAvailable($query, $stmt, $startTime, $timeout));
+
+        sleep(1);
+
+        return $id;
     }
 
     private function doRunWhenComponentAvailable($query, $stmt, $startTime, $timeout = 60, $js = null)
