@@ -98,7 +98,7 @@ JS;
 
             $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             $cell = $admin->findElement(By::id($cellDomId));
-            $admin->action()->doubleClick($cell)->perform();
+            $admin->action()->click($cell)->perform();
         });
     }
 
