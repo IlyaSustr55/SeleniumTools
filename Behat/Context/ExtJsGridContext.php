@@ -955,9 +955,9 @@ JS;
 //    }
 
     /**
-     * @When in grid :tid I once click column :columnLabel in row which contains :expectedText piece of text
+     * @When in grid :tid I double-click column :columnLabel in row which contains :expectedText piece of text
      */
-    public function inGridIOnceClickColumnAtRowWhichContainsPieceOfText($tid, $columnLabel, $expectedText)
+    public function inGridIDoubleClickColumnAtRowWhichContainsPieceOfText($tid, $columnLabel, $expectedText)
     {
 
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
@@ -991,7 +991,7 @@ JS;
 
             $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid]", $js);
             $cell = $admin->findElement(By::id($cellDomId));
-            $admin->action()->click($cell)->perform();
+            $admin->action()->doubleClick($cell)->perform();
         });
     }
 
