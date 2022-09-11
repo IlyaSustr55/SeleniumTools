@@ -81,7 +81,7 @@ class BehatDriverFactory implements DriverFactoryInterface
             '--whitelisted-ips'
         ));
 
-        $capabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
+        $capabilities->setCapability(ChromeOptions::CAPABILITY_W3C, $chromeOptions);
 
         return $this->doCreateDriver($actor, $driverConfig, $capabilities);
     }
