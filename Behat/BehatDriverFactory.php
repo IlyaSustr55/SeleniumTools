@@ -53,7 +53,7 @@ class BehatDriverFactory implements DriverFactoryInterface
                 'Harness "%s" configuration relies on a driver "%s" which is not declared in config.',
                 $this->harnessName, $harnessConfig['driver']
             );
-            throw InvalidConfigException::create($msg, '/harnesses/'.$this->harnessName);
+            throw InvalidConfigException::create($msg, '/harnesses/' . $this->harnessName);
         }
         $driverConfig = $this->config['drivers'][$harnessConfig['driver']];
 
@@ -64,6 +64,7 @@ class BehatDriverFactory implements DriverFactoryInterface
             );
             throw InvalidConfigException::create($msg, "/drivers[{$harnessConfig['driver']}]");
         }
+
         $reflClass = new \ReflectionClass(DesiredCapabilities::class);
         $reflMethod = $reflClass->getMethod($driverConfig['browser']);
         $capabilities = $reflMethod->invoke(null);
@@ -80,7 +81,7 @@ class BehatDriverFactory implements DriverFactoryInterface
             '--whitelisted-ips'
         ));
 
-        $capabilities->setCapability(ChromeOptions::CAPABILITY_W3C, $chromeOptions);
+        $capabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
         return $this->doCreateDriver($actor, $driverConfig, $capabilities);
     }
@@ -91,8 +92,7 @@ class BehatDriverFactory implements DriverFactoryInterface
             $driverConfig['host'],
             $capabilities,
             $driverConfig['connection_timeout'],
-            $driverConfig['request_timeout'],
-            $capabilities
+            $driverConfig['request_timeout']
         );
     }
 }
