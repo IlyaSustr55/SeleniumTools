@@ -913,7 +913,7 @@ JS;
             $button = $admin->findElement(By::id($domId));
 
             $admin->action()
-                ->moveToElement($button, $width - 5, 5)
+                ->moveToElement($button, round($width/2-5))
                 ->click()
                 ->perform();
         });
