@@ -53,7 +53,7 @@ class BehatDriverFactory implements DriverFactoryInterface
                 'Harness "%s" configuration relies on a driver "%s" which is not declared in config.',
                 $this->harnessName, $harnessConfig['driver']
             );
-            throw InvalidConfigException::create($msg, '/harnesses/'.$this->harnessName);
+            throw InvalidConfigException::create($msg, '/harnesses/' . $this->harnessName);
         }
         $driverConfig = $this->config['drivers'][$harnessConfig['driver']];
 
@@ -64,18 +64,24 @@ class BehatDriverFactory implements DriverFactoryInterface
             );
             throw InvalidConfigException::create($msg, "/drivers[{$harnessConfig['driver']}]");
         }
+
         $reflClass = new \ReflectionClass(DesiredCapabilities::class);
         $reflMethod = $reflClass->getMethod($driverConfig['browser']);
         $capabilities = $reflMethod->invoke(null);
 
         $chromeOptions = new ChromeOptions();
         $chromeOptions->addArguments(array(
-          '--window-size=1880,1000',  '--start-maximized', '--accept-ssl-certs=true', '--ignore-certificate-errors', '--disable-dev-shm-usage', '--no-sandbox'
-
-//             '--start-maximized', '--accept-ssl-certs=true', '--disable-dev-shm-usage', '--no-sandbox'
+            '--window-size=1880,1000',
+            '--start-maximized',
+            '--ignore-certificate-errors',
+            '--disable-dev-shm-usage',
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--headless',
+            '--whitelisted-ips'
         ));
 
-        $capabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
+        $capabilities->setCapability(ChromeOptions::CAPABILITY_W3C, $chromeOptions);
 
         return $this->doCreateDriver($actor, $driverConfig, $capabilities);
     }
