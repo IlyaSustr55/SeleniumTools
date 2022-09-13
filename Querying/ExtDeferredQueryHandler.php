@@ -367,7 +367,7 @@ JST;
         $this->driver->executeScript($js);
 
         $startTime = time();
-        $timeout = 30;
+        $timeout = 60;
 
         while (true) {
             $value = $this->driver->executeScript("return window.$functionName();"); // invoking previously published function
