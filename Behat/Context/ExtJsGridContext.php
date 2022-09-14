@@ -508,7 +508,7 @@ var grid = firstCmp;
 var view = grid.getView();
 var store = grid.getStore();
 
-var rowPosition = store.find('name', '%expectedText%', 0, true);
+var rowPosition = store.find('name', '%expectedText%');
 
 var isRowFound = -1 != rowPosition;
 if (isRowFound) {
@@ -629,15 +629,19 @@ JS;
 
             $el = $admin->findElement(By::id($domId));
             $el->getLocationOnScreenOnceScrolledIntoView();
+            usleep(500000);
             $el->click();
+            usleep(500000);
 
-            sleep(1);
 
             $isEditorCombo = $q->runWhenComponentAvailable("editor[editing=true]", $jsChange);
 
             if (!$isEditorCombo) {
                 // true
-                $admin->switchTo()->activeElement()->clear();
+                $admin->switchTo()->activeElement();
+                for($i = 0; $i<100; $i++) {
+                    $admin->getKeyboard()->sendKeys(WebDriverKeys::BACKSPACE);
+                }
                 $admin->getKeyboard()->sendKeys($value);
             }
 
