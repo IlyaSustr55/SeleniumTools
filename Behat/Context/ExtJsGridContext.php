@@ -37,7 +37,7 @@ JS;
 
             $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             $cell = $admin->findElement(By::id($cellDomId));
-            $admin->action()->doubleClick($cell)->perform();
+            $admin->action()->click($cell)->perform();
         });
     }
 
@@ -98,7 +98,7 @@ JS;
 
             $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             $cell = $admin->findElement(By::id($cellDomId));
-            $admin->action()->doubleClick($cell)->perform();
+            $admin->action()->click($cell)->perform();
         });
     }
 
@@ -508,7 +508,7 @@ var grid = firstCmp;
 var view = grid.getView();
 var store = grid.getStore();
 
-var rowPosition = store.find('name', '%expectedText%', 0, true);
+var rowPosition = store.find('name', '%expectedText%');
 
 var isRowFound = -1 != rowPosition;
 if (isRowFound) {
@@ -629,15 +629,19 @@ JS;
 
             $el = $admin->findElement(By::id($domId));
             $el->getLocationOnScreenOnceScrolledIntoView();
+            usleep(500000);
             $el->click();
+            usleep(500000);
 
-            sleep(1);
 
             $isEditorCombo = $q->runWhenComponentAvailable("editor[editing=true]", $jsChange);
 
             if (!$isEditorCombo) {
                 // true
-                $admin->switchTo()->activeElement()->clear();
+                $admin->switchTo()->activeElement();
+                for($i = 0; $i<100; $i++) {
+                    $admin->getKeyboard()->sendKeys(WebDriverKeys::BACKSPACE);
+                }
                 $admin->getKeyboard()->sendKeys($value);
             }
 
@@ -955,9 +959,9 @@ JS;
 //    }
 
     /**
-     * @When in grid :tid I once click column :columnLabel in row which contains :expectedText piece of text
+     * @When in grid :tid I double-click column :columnLabel in row which contains :expectedText piece of text
      */
-    public function inGridIOnceClickColumnAtRowWhichContainsPieceOfText($tid, $columnLabel, $expectedText)
+    public function inGridIDoubleClickColumnAtRowWhichContainsPieceOfText($tid, $columnLabel, $expectedText)
     {
 
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $expectedText, $columnLabel) {
@@ -991,7 +995,7 @@ JS;
 
             $cellDomId = $q->runWhenComponentAvailable("grid[tid=$tid]", $js);
             $cell = $admin->findElement(By::id($cellDomId));
-            $admin->action()->click($cell)->perform();
+            $admin->action()->doubleClick($cell)->perform();
         });
     }
 
