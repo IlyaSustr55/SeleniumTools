@@ -362,6 +362,27 @@ JS;
     }
 
     /**
+     * @When in grid :tid I click on all cell with column :columnLabel
+     */
+    public function inGridIClickCellWhereOneOfTheCellsContaindsdsddStrictMatchOfText($tid, $columnLabel)
+    {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $columnLabel) {
+            $js = <<<'JS'
+var items_test = [];
+var items = firstCmp.getStore().data.items;
+for(var i = 0; i < items.length; i++){
+     items_test[i] = items[i].data.name;
+}
+return items_test;
+JS;
+            $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
+            for ($i = 0; count($domId)>$i; $i++) {
+                $this->inGridIClickCellWhereOneOfTheCellsContainStrictMatchOfText($tid, $columnLabel, $domId[$i]);
+            }
+        });
+    }
+
+    /**
      * @When in grid :tid I click a column :columnLabel where one of the cells contains strict match :expectedText text
      */
     public function inGridIClickCellWhereOneOfTheCellsContainStrictMatchOfText($tid, $columnLabel, $expectedText)
