@@ -364,7 +364,7 @@ JS;
     /**
      * @When in grid :tid I click on all cell with column :columnLabel
      */
-    public function inGridIClickCellWhereOneOfTheCellsContaindsdsddStrictMatchOfText($tid, $columnLabel)
+    public function inGridIClickOnAllCellWithColumn($tid, $columnLabel)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $columnLabel) {
             $js = <<<'JS'
