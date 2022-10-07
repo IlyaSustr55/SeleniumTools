@@ -368,12 +368,12 @@ JS;
     {
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $columnLabel) {
             $js = <<<'JS'
-var items_test = [];
+var item = [];
 var items = firstCmp.getStore().data.items;
 for(var i = 0; i < items.length; i++){
-     items_test[i] = items[i].data.name;
+     item[i] = items[i].data.name;
 }
-return items_test;
+return item;
 JS;
             $domId = $q->runWhenComponentAvailable("grid[tid=$tid] ", $js);
             for ($i = 0; count($domId)>$i; $i++) {
