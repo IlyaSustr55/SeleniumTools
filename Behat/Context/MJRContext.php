@@ -559,9 +559,11 @@ JS;
 
 
     /**
+     * @Then I dont see text in :type :tid
+     * @Then I dont see text in :nth :type :tid
      * @Then I dont see text in :tid
      */
-    public function thenIDonSeeText($tid, $nth = 1)
+    public function thenIDonSeeText($type = "component", $tid, $nth = 1)
     {
         if ($nth == 'first') {
             $nth = 1;
@@ -573,22 +575,22 @@ JS;
             $nth = 4;
         }
 
-        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($tid, $nth) {
+        $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($type, $tid, $nth) {
 
             $js = <<<'JS'
-
-    if (firstCmp.xtype == 'combobox' || firstCmp.xtype == 'combo') {
-         return firstCmp.getDisplayValue();
-    } else if (firstCmp.xtype == 'button') {
-         return firstCmp.text;
-    } else if (firstCmp.xtype == 'box') {
-         return firstCmp.html;
+    var component = Ext.ComponentQuery.query("%type%[tid=%tid%]:nth-child(%nth%n)")[0];
+    if (component.xtype == 'combobox' || component.xtype == 'combo') {
+         return component.getDisplayValue();
+    } else if (component.xtype == 'button') {
+         return component.text;
+    } else if (component.xtype == 'box') {
+         return component.html;
     } else {
-         return firstCmp.getValue();
+         return component.getValue();
     }
 JS;
-
-            $value = $q->runWhenComponentAvailable("component[tid=$tid]:nth-child({$nth}n)", $js);
+            $js = str_replace(['%type%', '%tid%', '%nth%'], [$type, $tid, $nth], $js);
+            $value = $q->runWhenComponentAvailable("component[tid=$tid]", $js);
             var_dump("", $value, "" == $value);
             //Assert::assertEquals($text, $value);
 
