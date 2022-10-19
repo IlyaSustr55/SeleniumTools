@@ -68,8 +68,10 @@ class BehatDriverFactory implements DriverFactoryInterface
         $reflClass = new \ReflectionClass(DesiredCapabilities::class);
         $reflMethod = $reflClass->getMethod($driverConfig['browser']);
         $capabilities = $reflMethod->invoke(null);
+        $downloaddir = "Download/";
 
         $chromeOptions = new ChromeOptions();
+        $chromeOptions->setExperimentalOption("prefs",[ "download.default_directory" => $downloaddir]);
         $chromeOptions->addArguments(array(
             '--window-size=1880,1000',
             '--start-maximized',
@@ -82,6 +84,7 @@ class BehatDriverFactory implements DriverFactoryInterface
         ));
 
         $capabilities->setCapability(ChromeOptions::CAPABILITY_W3C, $chromeOptions);
+        $capabilities->setCapability("unexpectedAlertBehaviour","accept");
 
         return $this->doCreateDriver($actor, $driverConfig, $capabilities);
     }
