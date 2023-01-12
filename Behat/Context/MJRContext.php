@@ -392,6 +392,9 @@ class MJRContext extends HarnessAwareContext
         } else if ($nth == 'fourth') {
             $nth = 4;
         }
+        if ($text == "nothing") {
+            $text = "";
+        }
 
         $this->runActiveActor(function (RemoteWebDriver $admin, $actor, $backend, ExtDeferredQueryHandler $q) use ($text, $tid, $nth) {
             // We cannot simply query by $tid, because it returns HTML <table> element instead of <input> that we need
@@ -549,10 +552,19 @@ JS;
 
             $value = str_replace("\n", "", strip_tags(trim($value)));
 
-            $text = str_replace("TODAY_DATE", date("d.m.Y"), $text);
+            if (stristr($text, "TODAY_DATE")) {
+                try {
+                    $text = explode(" ", $text);
+                    $text[1] = str_replace("(", "", $text[1]);
+                    $text[1] = str_replace(")", "", $text[1]);
+                    $text = str_replace($text[0], date($text[1]), $text[0]);
+                } catch (\Exception $e) {
+                    $text = str_replace("TODAY_DATE", date("d.m.Y"), $text[0]);
+                }
+            }
 
             if ($text != $value) var_dump($text, $value, $text == $value);
-            //Assert::assertEquals($text, $value);
+            Assert::assertEquals($text, $value);
 
         });
     }
@@ -591,8 +603,8 @@ JS;
 JS;
             $js = str_replace(['%type%', '%tid%', '%nth%'], [$type, $tid, $nth], $js);
             $value = $q->runWhenComponentAvailable("component[tid=$tid]", $js);
-            var_dump("", $value, "" == $value);
-            //Assert::assertEquals($text, $value);
+            if ($value != "") var_dump("", $value, "" == $value);
+            Assert::assertEquals("", $value);
 
         });
     }
@@ -734,21 +746,7 @@ JS;
     public function iSeeBadgeWithText($text)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin) use ($text) {
-
-            var_dump(WebDriverBy::xpath(
-                sprintf(
-                    '//div[contains(@class, "tag") and contains(text(), %s)]',
-                    XPathEscaper::escapeQuotes($text)
-                )
-            ));
-
-
-            $admin->wait()->until(WebDriverExpectedCondition::visibilityOfAnyElementLocated(WebDriverBy::xpath(
-                sprintf(
-                    '//div[contains(@class, "tag") and contains(text(), %s)]',
-                    XPathEscaper::escapeQuotes($text)
-                )
-            )));
+            $admin->wait()->until(WebDriverExpectedCondition::visibilityOfAnyElementLocated(WebDriverBy::xpath('//div[contains(@class, "tag") and contains(text(), "'.$text.'")]')));
         });
     }
 
@@ -758,12 +756,7 @@ JS;
     public function iDoNotSeeBadgeWithText($text)
     {
         $this->runActiveActor(function (RemoteWebDriver $admin) use ($text) {
-            $admin->wait()->until(WebDriverExpectedCondition::not(WebDriverExpectedCondition::visibilityOfAnyElementLocated(WebDriverBy::xpath(
-                sprintf(
-                    '//div[contains(@class, "tag-") and contains(text(), "%s")]',
-                    XPathEscaper::escapeQuotes($text)
-                )
-            ))));
+            $admin->wait()->until(WebDriverExpectedCondition::invisibilityOfElementLocated(WebDriverBy::xpath('//div[contains(@class, "tag") and contains(text(), "'.$text.'")]')));
         });
     }
 
