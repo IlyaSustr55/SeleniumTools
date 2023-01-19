@@ -77,6 +77,7 @@ class ActorsExtension implements ExtensionInterface
                                 ->prototype('array')
                                     ->children()
                                         ->scalarNode('base_url')->end()
+                                        ->scalarNode('user_email')->end()
                                     ->end()
                                 ->end()
                             ->end()

@@ -73,12 +73,13 @@ class TestHarness
     /**
      * @param string $actorName
      * @param string $startUrl
+     * @param string $userEmail
      *
      * @return TestHarness
      */
-    public function addActor($actorName, $startUrl)
+    public function addActor($actorName, $startUrl, $userEmail)
     {
-        $this->actors[$actorName] = new Actor($actorName, $startUrl, $this);
+        $this->actors[$actorName] = new Actor($actorName, $startUrl, $userEmail, $this);
 
         return $this;
     }

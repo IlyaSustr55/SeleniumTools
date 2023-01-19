@@ -49,7 +49,7 @@ class TestHarnessFactory
         );
 
         foreach ($harnessConfig['actors'] as $name => $actorConfig) {
-            $harness->addActor($name, $actorConfig['base_url']);
+            $harness->addActor($name, $actorConfig['base_url'], $actorConfig['user_email']);
         }
 
         return $harness;

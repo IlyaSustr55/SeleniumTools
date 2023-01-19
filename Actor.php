@@ -42,6 +42,11 @@ class Actor
     private $startUrl;
 
     /**
+     * @var string
+     */
+    private $userEmail;
+
+    /**
      * @var TestHarness
      */
     private $harness;
@@ -76,14 +81,16 @@ class Actor
      * @param string $name A name that represents this user, like "admin". This name later can be used by listeners
      *                      to properly format execution logs and things like that
      * @param string $startUrl A URL of default page that will be opened in a browser
+     * @param string $userEmail
      * @param TestHarness $harness A test harness this actor belongs to
      */
     public function __construct(
-        $name, $startUrl, TestHarness $harness
+        $name, $startUrl, $userEmail, TestHarness $harness
     )
     {
         $this->name = $name;
         $this->startUrl = $startUrl;
+        $this->userEmail = $userEmail;
         $this->harness = $harness;
     }
 
@@ -93,6 +100,11 @@ class Actor
     public function getStartUrl()
     {
         return $this->startUrl;
+    }
+
+    public function getUserEmail()
+    {
+        return $this->userEmail;
     }
 
     /**

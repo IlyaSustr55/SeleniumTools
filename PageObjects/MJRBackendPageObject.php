@@ -4,6 +4,7 @@ namespace Modera\Component\SeleniumTools\PageObjects;
 
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
+use Modera\Component\SeleniumTools\Behat\Context\HarnessAwareContext;
 use Modera\Component\SeleniumTools\Querying\By;
 use Modera\Component\SeleniumTools\Querying\ExtDeferredQueryHandler;
 use Facebook\WebDriver\WebDriverExpectedCondition;
@@ -15,13 +16,12 @@ use Facebook\WebDriver\WebDriverExpectedCondition;
  * @author    Sergei Lissovski <sergei.lissovski@modera.org>
  * @copyright 2017 Modera Foundation
  */
-class MJRBackendPageObject
+class MJRBackendPageObject extends HarnessAwareContext
 {
     /**
      * @var RemoteWebDriver
      */
     private $driver;
-
     /**
      * @var ExtDeferredQueryHandler
      */
@@ -45,19 +45,27 @@ class MJRBackendPageObject
         $el->sendKeys($username);
     }
 
+    public function typeInUserEmail()
+    {
+
+        $el = $this->driver->findElements(By::named(['field', 'name@host.com']))[1];
+        $el->clear();
+        $el->sendKeys($this->getActor()->getUserEmail());
+    }
+
     /**
      * @param string $password
      */
-    public function typeInPassword($password)
+    public function typeInPassword($password, $type)
     {
-        $el = $this->driver->findElement(By::named(['field', 'Password']));
+        $el = $this->driver->findElements(By::named(['field', 'Password']))[$type];
         $el->clear();
         $el->sendKeys($password);
     }
 
-    public function clickSignInButton()
+    public function clickSignInButton($type)
     {
-        $this->driver->findElement(By::named(['button', 'Sign in']))->click();
+        $this->driver->findElements(By::named(['button', 'Sign in']))[$type]->click();
     }
 
     /**
@@ -67,20 +75,26 @@ class MJRBackendPageObject
     public function login($username, $password)
     {
         $this->driver->wait(50, 1000)->until(
-            WebDriverExpectedCondition::visibilityOfElementLocated(By::named(['field', 'User ID']))
+            WebDriverExpectedCondition::visibilityOfAnyElementLocated(By::named(['field', 'Password']))
         );
-
-        $sleep = 500000; // half second
-        $this->typeInUsername($username);
+        if (empty($this->driver->findElements(By::named(['field', 'name@host.com'])))) {
+            $sleep = 500000; // half second
+            $this->typeInUsername($username);
+            usleep($sleep);
+            $type = 0;
+        } else {
+            $sleep = 500000; // half second
+            $this->typeInUserEmail();
+            usleep($sleep);
+            $type = 1;
+        }
+        $this->typeInPassword($password, $type);
         usleep($sleep);
-        $this->typeInPassword($password);
+        $this->clickSignInButton($type);
         usleep($sleep);
-        $this->clickSignInButton();
-        usleep($sleep);
-
         try {
             $this->driver->wait(50, 1000)->until(
-                WebDriverExpectedCondition::invisibilityOfElementLocated(By::named(['field', 'User ID']))
+                WebDriverExpectedCondition::invisibilityOfElementLocated(By::named(['field', 'Password']))
             );
         } catch (\Exception $e) {}
     }
