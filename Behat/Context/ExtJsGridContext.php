@@ -726,7 +726,7 @@ JS;
 
                 if ($expectedText != $value) var_dump([$expectedText, $value, $expectedText == $value]);
 
-                //Assert::assertEquals($expectedText, $value);
+                Assert::assertEquals($expectedText, $value);
             }
 
         });
@@ -860,17 +860,17 @@ JS;
             $value = $q->runWhenComponentAvailable("propertygrid[tid=$tid]", $js);
             if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $value)) {
                 $parsedDate = date_parse_from_format("d.m.Y", $value);
-                $value = date('Y-m-d', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
+                $value = date('d.m.Y', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
             }
             if (preg_match('/\d{2}\.\d{2}\.\d{4}/', $expectedText)) {
                 $parsedDate = date_parse_from_format("d.m.Y", $expectedText);
-                var_dump($expectedText, $parsedDate);
-                $expectedText = date('Y-m-d', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
+                //var_dump($expectedText, $parsedDate);
+                $expectedText = date('d.m.Y', mktime(0, 0, 0, $parsedDate['month'], $parsedDate['day'], $parsedDate['year']));
             }
 
             if ($expectedText != $value) var_dump($value, $expectedText);
 
-            Assert::assertTrue($value != 'null' && $value != '' && $value != 'false' && $value != '-');
+            Assert::assertEquals($expectedText, $value);
 
         });
     }
