@@ -531,7 +531,7 @@ JS;
         return Ext.Date.format(firstCmp.getValue(), 'l, d M Y');
     } else if(firstCmp.xtype == 'mfc-header') {
         return firstCmp.title;
-    } else if (firstCmp.xtype == 'button' || firstCmp.xtype == 'splitbutton' || firstCmp.xtype == 'menubutton'  || firstCmp.xtype == 'menuitem') {
+    } else if (firstCmp.xtype == 'button' || firstCmp.xtype == 'splitbutton' || firstCmp.xtype == 'deal-detail-btn' || firstCmp.xtype == 'menubutton'  || firstCmp.xtype == 'menuitem') {
          return firstCmp.text;
     } else if (firstCmp.xtype == 'box') {
         if(firstCmp.html != undefined)
