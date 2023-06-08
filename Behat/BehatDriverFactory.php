@@ -73,13 +73,13 @@ class BehatDriverFactory implements DriverFactoryInterface
         $chromeOptions = new ChromeOptions();
         $chromeOptions->setExperimentalOption("prefs",[ "download.default_directory" => $downloaddir]);
         $chromeOptions->addArguments(array(
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-setuid-sandbox',
+            '--headless',
             '--window-size=1880,1000',
             '--start-maximized',
             '--ignore-certificate-errors',
-            '--disable-dev-shm-usage',
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--headless',
             '--whitelisted-ips'
         ));
 
