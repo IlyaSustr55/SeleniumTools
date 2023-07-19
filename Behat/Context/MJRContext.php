@@ -53,9 +53,17 @@ class MJRContext extends HarnessAwareContext
      */
     public function iNavigateToSection($section)
     {
+        /**
         $this->runActiveActor(function ($admin, $actor, MJRBackendPageObject $backend) use ($section) {
             $backend->clickMenuItemWithLabel($section);
 
+            sleep(1);
+        });
+        **/
+        $this->runActiveActor(function (RemoteWebDriver $admin) use ($section) {
+            $xpath = '//div[@data-tid="app-sidebar"]//div[text() = "' . $section . '"]';
+            $admin->wait()->until(WebDriverExpectedCondition::visibilityOfAnyElementLocated(WebDriverBy::xpath($xpath)));
+            $admin->findElements(By::xpath($xpath))[0]->click();
             sleep(1);
         });
     }
